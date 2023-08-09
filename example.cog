@@ -1,2 +1,3 @@
 let a = 5323;
 let b = a;
+let c = "helo"

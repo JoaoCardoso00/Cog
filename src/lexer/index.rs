@@ -1,5 +1,6 @@
 use super::token::Token;
 use super::types::{Type, Value};
+use crate::helpers::is_string::literal_helpers;
 
 pub fn tokenize(source_code: String) -> Vec<Token<Value>> {
     let tokens: Vec<Token<Value>> = source_code
@@ -38,6 +39,10 @@ pub fn tokenize(source_code: String) -> Vec<Token<Value>> {
                         .expect("Error parsing numerical value"),
                 ),
             },
+            string if string.is_ascii() && string.is_string_literal() => Token::<Value> {
+                r#type: Type::String,
+                value: Value::String(String::from(string)),
+            },
             variable if variable.is_ascii() => Token::<Value> {
                 r#type: Type::Variable,
                 value: Value::String(String::from(variable)),
@@ -45,6 +50,8 @@ pub fn tokenize(source_code: String) -> Vec<Token<Value>> {
             _ => todo!(),
         })
         .collect();
+
+    dbg!(&tokens);
 
     return tokens;
 }

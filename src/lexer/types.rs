@@ -4,6 +4,7 @@ pub enum Type {
     Variable,
     Expression,
     Number,
+    String,
 }
 
 #[derive(Debug)]

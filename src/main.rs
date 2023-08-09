@@ -1,8 +1,8 @@
 use std::env;
+mod helpers;
+mod lexer;
 
 use crate::lexer::index::tokenize;
-
-mod lexer;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
