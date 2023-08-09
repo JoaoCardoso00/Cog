@@ -46,9 +46,5 @@ pub fn tokenize(source_code: String) -> Vec<Token<Value>> {
         })
         .collect();
 
-        dbg!(tokens);
-
-        todo!()
-    // println!("{:?}", expressions);
-    // tokens
+    return tokens;
 }
