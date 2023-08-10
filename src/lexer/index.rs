@@ -1,6 +1,6 @@
 use super::token::Token;
 use super::types::{Type, Value};
-use crate::helpers::is_string::literal_helpers;
+use crate::helpers::is_string::LiteralHelpers;
 
 pub fn tokenize(source_code: String) -> Vec<Token<Value>> {
     let tokens: Vec<Token<Value>> = source_code
