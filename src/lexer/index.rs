@@ -12,23 +12,23 @@ pub fn tokenize(source_code: String) -> Vec<Token<Value>> {
                 value: Value::String(String::from("let")),
             },
             "=" => Token::<Value> {
-                r#type: Type::Expression,
+                r#type: Type::Operator,
                 value: Value::String(String::from("=")),
             },
             "+" => Token::<Value> {
-                r#type: Type::Expression,
+                r#type: Type::Operator,
                 value: Value::String(String::from("+")),
             },
             "-" => Token::<Value> {
-                r#type: Type::Expression,
+                r#type: Type::Operator,
                 value: Value::String(String::from("-")),
             },
             "*" => Token::<Value> {
-                r#type: Type::Expression,
+                r#type: Type::Operator,
                 value: Value::String(String::from("*")),
             },
             "/" => Token::<Value> {
-                r#type: Type::Expression,
+                r#type: Type::Operator,
                 value: Value::String(String::from("/")),
             },
             number if number.parse::<f64>().is_ok() => Token::<Value> {
@@ -50,8 +50,6 @@ pub fn tokenize(source_code: String) -> Vec<Token<Value>> {
             _ => todo!(),
         })
         .collect();
-
-    dbg!(&tokens);
 
     return tokens;
 }

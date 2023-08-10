@@ -2,7 +2,7 @@
 pub enum Type {
     Keyword,
     Variable,
-    Expression,
+    Operator,
     Number,
     String,
 }

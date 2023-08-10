@@ -1,6 +1,9 @@
 use std::env;
 mod helpers;
 mod lexer;
+mod parser;
+
+use parser::index::parse;
 
 use crate::lexer::index::tokenize;
 
@@ -14,4 +17,5 @@ fn main() {
     // println!("File contents: {}", file_contents)
 
     let tokens = tokenize(file_contents);
+    parse(tokens);
 }
