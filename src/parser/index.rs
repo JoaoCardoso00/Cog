@@ -22,13 +22,11 @@ fn build_assignment_expression(tokens: Vec<Token<Value>>) {
         .r#type
     {
         Type::Variable => match token_iter.nth(0).unwrap().value {
-            Value::String(string) => println!("{:?}", string),
+            Value::String(string) => string,
             _ => panic!("Wrong type for assignment variable name"),
         },
         _ => panic!("Wrong type for assignment variable name"),
     };
-
-    dbg!(token_iter);
 
     let _ = token_iter.next();
 
