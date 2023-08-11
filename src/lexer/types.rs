@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub enum Type {
     Keyword,
-    Variable,
+    Identifier,
     Operator,
     Number,
     String,

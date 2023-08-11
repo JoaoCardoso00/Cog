@@ -17,5 +17,8 @@ fn main() {
     // println!("File contents: {}", file_contents)
 
     let tokens = tokenize(file_contents);
-    parse(tokens);
+
+    let ast = parse(tokens);
+
+    dbg!(ast);
 }

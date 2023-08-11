@@ -2,6 +2,8 @@ use super::token::Token;
 use super::types::{Type, Value};
 use crate::helpers::is_string::LiteralHelpers;
 
+//TODO: Change to peekable
+
 pub fn tokenize(source_code: String) -> Vec<Token<Value>> {
     let tokens: Vec<Token<Value>> = source_code
         .split(&[';', '\n', ' '][..])
@@ -44,7 +46,7 @@ pub fn tokenize(source_code: String) -> Vec<Token<Value>> {
                 value: Value::String(String::from(string)),
             },
             variable if variable.is_ascii() => Token::<Value> {
-                r#type: Type::Variable,
+                r#type: Type::Identifier,
                 value: Value::String(String::from(variable)),
             },
             _ => todo!(),

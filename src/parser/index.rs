@@ -1,3 +1,5 @@
+use core::panic;
+
 use crate::lexer::{
     token::Token,
     types::{Type, Value},
@@ -5,23 +7,44 @@ use crate::lexer::{
 
 use super::ast::{AssignmentExpression, Expression};
 
-pub fn parse(tokens: Vec<Token<Value>>) {
-    build_assignment_expression(tokens)
+pub fn parse(tokens: Vec<Token<Value>>) -> Vec<Expression> {
+    let mut expressions: Vec<Expression> = vec![];
+
+    let test = build_assignment_expression(tokens);
+    expressions.push(test);
+
+    // let mut cursor = 0;
+
+    // while cursor < tokens.len() {
+    //     let current_token = tokens.get(cursor).unwrap();
+
+    //     match current_token.r#type {
+    //         Type::Keyword => match &current_token.value {
+    //             Value::String(string) => match string.as_str() {
+                    
+    //                 _ => todo!(),
+    //             },
+    //             _ => todo!(),
+    //         },
+    //         _ => todo!(),
+    //     }
+    // }
+
+    expressions
 }
 
-fn build_assignment_expression(tokens: Vec<Token<Value>>) {
+fn build_assignment_expression(tokens: Vec<Token<Value>>) -> Expression {
+
     let mut token_iter = tokens.into_iter();
 
     let _ = token_iter.next(); // consume the "let"
 
-    todo!("Finish parsing for assignment functions");
-
-    let variable_name = match token_iter
+    let variable_name = token_iter
         .next()
-        .expect("Error parsing variable name for assignment expression")
-        .r#type
-    {
-        Type::Variable => match token_iter.nth(0).unwrap().value {
+        .expect("Error parsing variable name for assignment expression");
+
+    let variable_name = match variable_name.r#type {
+        Type::Identifier => match variable_name.value {
             Value::String(string) => string,
             _ => panic!("Wrong type for assignment variable name"),
         },
@@ -39,5 +62,5 @@ fn build_assignment_expression(tokens: Vec<Token<Value>>) {
 
     let expression = Expression::Assignment(Box::new(assignment_expression));
 
-    println!("{:?}", expression);
+    expression
 }
