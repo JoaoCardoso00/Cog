@@ -1,4 +1,4 @@
-use super::types::Type;
+use super::lib::Type;
 
 #[derive(Debug)]
 pub struct Token<TValue> {

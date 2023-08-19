@@ -1,3 +1,2 @@
-pub mod index;
+pub mod lib;
 pub mod token;
-pub mod types;

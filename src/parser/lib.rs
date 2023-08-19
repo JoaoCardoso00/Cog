@@ -2,7 +2,7 @@ use core::panic;
 
 use crate::lexer::{
     token::Token,
-    types::{Type, Value},
+    lib::{Type, Value},
 };
 
 use super::ast::{AssignmentExpression, Expression};

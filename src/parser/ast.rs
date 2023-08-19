@@ -1,4 +1,4 @@
-use crate::lexer::types::Value;
+use crate::lexer::lib::Value;
 
 #[derive(Debug)]
 pub enum Expression {
@@ -8,5 +8,5 @@ pub enum Expression {
 #[derive(Debug)]
 pub struct AssignmentExpression {
     pub identifier: String,
-    pub value: Value,
+    pub value: Value
 }

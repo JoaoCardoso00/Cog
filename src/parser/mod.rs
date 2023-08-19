@@ -1,2 +1,2 @@
 pub mod ast;
-pub mod index;
+pub mod lib;

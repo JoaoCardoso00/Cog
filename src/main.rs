@@ -3,9 +3,8 @@ mod helpers;
 mod lexer;
 mod parser;
 
-use parser::index::parse;
-
-use crate::lexer::index::tokenize;
+use crate::lexer::lib::tokenize;
+use parser::lib::parse;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -16,9 +15,8 @@ fn main() {
 
     // println!("File contents: {}", file_contents)
 
-    let tokens = tokenize(file_contents);
+    let tokens = tokenize(&file_contents);
+    // let ast = parse(tokens);
 
-    let ast = parse(tokens);
-
-    dbg!(ast);
+    dbg!(tokens.unwrap());
 }
