@@ -23,6 +23,7 @@ pub fn tokenize(input: &String) -> Result<Vec<Token<Value>>> {
     const NEW_LINE_CHARACTER: char = 0xA as char;
     let mut tokens: Vec<Token<Value>> = vec![];
     let mut cursor: usize = 0;
+    let lines: Vec<&str> = input.lines().collect();
 
     while cursor < input.len() {
         let char = input.chars().nth(cursor).expect("internal error");
@@ -81,7 +82,8 @@ pub fn tokenize(input: &String) -> Result<Vec<Token<Value>>> {
                     value: Value::Number(full_number),
                 });
             }
-            char if char.is_ascii() => {
+
+            '\"' => {
                 let mut full_statement = String::from(char);
 
                 // get full statement before classifying it
@@ -92,6 +94,44 @@ pub fn tokenize(input: &String) -> Result<Vec<Token<Value>>> {
                         Some(next_char) => match next_char {
                             ' ' => break,
                             valid_char if valid_char.is_ascii() => {
+                                full_statement.push(next_char);
+                                cursor += 1;
+
+                                if valid_char == '"' {
+                                    break;
+                                }
+
+                                continue;
+                            }
+                            _ => break,
+                        },
+                        None => break,
+                    }
+                }
+
+                // dbg!(full_statement.as_str().is_string_literal());
+
+                match full_statement {
+                    string if string.is_string_literal() => tokens.push(Token {
+                        r#type: Type::String,
+                        value: Value::String(string),
+                    }),
+
+                    _ => bail!("failed to read string at position {}", cursor),
+                }
+            }
+
+            char if char.is_ascii() => {
+                let mut full_statement = String::from(char);
+
+                // get full statement before classifying it
+                loop {
+                    let next_char = input.chars().nth(cursor + 1);
+
+                    match next_char {
+                        Some(next_char) => match next_char {
+                            ' ' => break,
+                            valid_char if valid_char.is_alphabetic() => {
                                 full_statement.push(next_char);
                                 cursor += 1;
                                 continue;
@@ -107,10 +147,6 @@ pub fn tokenize(input: &String) -> Result<Vec<Token<Value>>> {
                     "let" => tokens.push(Token {
                         r#type: Type::Keyword,
                         value: Value::String(String::from("let")),
-                    }),
-                    string if string.is_string_literal() => tokens.push(Token::<Value> {
-                        r#type: Type::String,
-                        value: Value::String(String::from(string)),
                     }),
                     _ => tokens.push(Token {
                         r#type: Type::Identifier,
