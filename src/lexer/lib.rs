@@ -20,15 +20,16 @@ pub enum Value {
 }
 
 pub fn tokenize(input: &String) -> Result<Vec<Token<Value>>> {
+    const NEW_LINE_CHARACTER: char = 0xA as char;
     let mut tokens: Vec<Token<Value>> = vec![];
     let mut cursor: usize = 0;
 
     while cursor < input.len() {
         let char = input.chars().nth(cursor).expect("internal error");
-        println!("{:?}", char);
 
         match char {
             ' ' => {}
+            NEW_LINE_CHARACTER => {}
             '=' => tokens.push(Token::<Value> {
                 r#type: Type::Operator,
                 value: Value::String(String::from("=")),
@@ -86,8 +87,6 @@ pub fn tokenize(input: &String) -> Result<Vec<Token<Value>>> {
                 // get full statement before classifying it
                 loop {
                     let next_char = input.chars().nth(cursor + 1);
-
-                    println!("{:?}", char);
 
                     match next_char {
                         Some(next_char) => match next_char {
