@@ -1,8 +1,6 @@
 use crate::helpers::is_string::LiteralHelpers;
 use anyhow::{bail, Result};
 
-use super::token::Token;
-
 #[derive(Debug)]
 pub enum Type {
     Keyword,
@@ -19,9 +17,16 @@ pub enum Value {
     Number(f64),
 }
 
-pub fn tokenize(input: &String) -> Result<Vec<Token<Value>>> {
+#[derive(Debug)]
+pub struct Token {
+    pub r#type: Type,
+    pub value: Value,
+}
+
+
+pub fn tokenize(input: &String) -> Result<Vec<Token>> {
     const NEW_LINE_CHARACTER: char = 0xA as char;
-    let mut tokens: Vec<Token<Value>> = vec![];
+    let mut tokens: Vec<Token> = vec![];
     let mut cursor: usize = 0;
     let lines: Vec<&str> = input.lines().collect();
 
@@ -31,27 +36,27 @@ pub fn tokenize(input: &String) -> Result<Vec<Token<Value>>> {
         match char {
             ' ' => {}
             NEW_LINE_CHARACTER => {}
-            '=' => tokens.push(Token::<Value> {
+            '=' => tokens.push(Token {
                 r#type: Type::Operator,
                 value: Value::String(String::from("=")),
             }),
-            '+' => tokens.push(Token::<Value> {
+            '+' => tokens.push(Token {
                 r#type: Type::Operator,
                 value: Value::String(String::from("+")),
             }),
-            '-' => tokens.push(Token::<Value> {
+            '-' => tokens.push(Token {
                 r#type: Type::Operator,
                 value: Value::String(String::from("-")),
             }),
-            '*' => tokens.push(Token::<Value> {
+            '*' => tokens.push(Token {
                 r#type: Type::Operator,
                 value: Value::String(String::from("*")),
             }),
-            '/' => tokens.push(Token::<Value> {
+            '/' => tokens.push(Token {
                 r#type: Type::Operator,
                 value: Value::String(String::from("/")),
             }),
-            ';' => tokens.push(Token::<Value> {
+            ';' => tokens.push(Token {
                 r#type: Type::Semi,
                 value: Value::String(String::from(";")),
             }),

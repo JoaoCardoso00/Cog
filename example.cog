@@ -1,5 +1,2 @@
 let x = "hello";
-
-"we"
-
-let d = "ooi";
+let d = 5 + 2;

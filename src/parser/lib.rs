@@ -1,13 +1,10 @@
 use core::panic;
 
-use crate::lexer::{
-    token::Token,
-    lib::{Type, Value},
-};
+use crate::lexer::lib::{Token, Type, Value};
 
 use super::ast::{AssignmentExpression, Expression};
 
-pub fn parse(tokens: Vec<Token<Value>>) -> Vec<Expression> {
+pub fn parse(tokens: Vec<Token>) -> Vec<Expression> {
     let mut expressions: Vec<Expression> = vec![];
 
     let test = build_assignment_expression(tokens);
@@ -21,7 +18,7 @@ pub fn parse(tokens: Vec<Token<Value>>) -> Vec<Expression> {
     //     match current_token.r#type {
     //         Type::Keyword => match &current_token.value {
     //             Value::String(string) => match string.as_str() {
-                    
+
     //                 _ => todo!(),
     //             },
     //             _ => todo!(),
@@ -33,8 +30,7 @@ pub fn parse(tokens: Vec<Token<Value>>) -> Vec<Expression> {
     expressions
 }
 
-fn build_assignment_expression(tokens: Vec<Token<Value>>) -> Expression {
-
+fn build_assignment_expression(tokens: Vec<Token>) -> Expression {
     let mut token_iter = tokens.into_iter();
 
     let _ = token_iter.next(); // consume the "let"
