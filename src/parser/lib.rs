@@ -7,9 +7,6 @@ use super::ast::{AssignmentExpression, Expression};
 pub fn parse(tokens: Vec<Token>) -> Vec<Expression> {
     let mut expressions: Vec<Expression> = vec![];
 
-    let test = build_assignment_expression(tokens);
-    expressions.push(test);
-
     // let mut cursor = 0;
 
     // while cursor < tokens.len() {

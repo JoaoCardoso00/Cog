@@ -9,6 +9,7 @@ pub enum Type {
     Semi,
     Number,
     String,
+    EOF,
 }
 
 #[derive(Debug)]
@@ -23,12 +24,11 @@ pub struct Token {
     pub value: Value,
 }
 
-
 pub fn tokenize(input: &String) -> Result<Vec<Token>> {
     const NEW_LINE_CHARACTER: char = 0xA as char;
     let mut tokens: Vec<Token> = vec![];
     let mut cursor: usize = 0;
-    let lines: Vec<&str> = input.lines().collect();
+    // let lines: Vec<&str> = input.lines().collect();
 
     while cursor < input.len() {
         let char = input.chars().nth(cursor).expect("internal error");
@@ -164,6 +164,11 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
 
         cursor += 1;
     }
+
+    tokens.push(Token {
+        r#type: Type::EOF,
+        value: Value::String(String::from("\0")),
+    });
 
     return Ok(tokens);
 }
