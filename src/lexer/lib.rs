@@ -9,6 +9,7 @@ pub enum Type {
     Operator,
     OpenParen,
     CloseParen,
+    Null,
     Semi,
     Number,
     String,
@@ -169,6 +170,10 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                     "let" => tokens.push(Token {
                         r#type: Type::Keyword,
                         value: Value::String(String::from("let")),
+                    }),
+                    "null" => tokens.push(Token {
+                        r#type: Type::Null,
+                        value: Value::String(String::from("null")),
                     }),
                     _ => tokens.push(Token {
                         r#type: Type::Identifier,
