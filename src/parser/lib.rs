@@ -17,17 +17,8 @@ impl Parser {
         Self { tokens, cursor: 0 }
     }
 
-    pub fn parse(&mut self) -> AST<'static> {
-        let mut statements: Vec<ASTExpression> = vec![];
-
-        while self.peek().r#type != Type::EOF {
-            statements.push(self.parse_statement());
-        }
-
-        AST {
-            kind: "Program",
-            statements,
-        }
+    fn not_eof(&self) -> bool {
+        self.tokens[self.cursor].r#type != Type::EOF
     }
 
     fn peek(&self) -> Token {
@@ -42,6 +33,19 @@ impl Parser {
         token
     }
 
+    pub fn parse(&mut self) -> AST<'static> {
+        let mut statements: Vec<ASTExpression> = vec![];
+
+        while self.not_eof() {
+            statements.push(self.parse_statement());
+        }
+
+        AST {
+            kind: "Program",
+            statements,
+        }
+    }
+
     fn parse_statement(&mut self) -> ASTExpression {
         self.parse_expression()
     }
@@ -53,8 +57,6 @@ impl Parser {
     //TODO: fix this
     fn parse_additive_expression(&mut self) -> ASTExpression {
         let mut left = self.parse_primary_expression();
-
-        self.cursor += 1;
 
         while self.peek().value == Value::String("+".to_string())
             || self.peek().value == Value::String("-".to_string())
@@ -77,7 +79,7 @@ impl Parser {
     }
 
     fn parse_primary_expression(&mut self) -> ASTExpression {
-        let token = self.peek();
+        let token = self.advance();
 
         match token.r#type {
             Type::Identifier => ASTExpression {
