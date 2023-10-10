@@ -1,59 +1,98 @@
 use core::panic;
 
-use crate::lexer::lib::{Token, Type, Value};
+use crate::{
+    lexer::lib::{Token, Type, Value},
+    parser::ast::BinaryExpressionBody,
+};
 
-use super::ast::{AssignmentExpression, Expression};
+use super::ast::{ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, AST};
 
-pub fn parse(tokens: Vec<Token>) -> Vec<Expression> {
-    let mut expressions: Vec<Expression> = vec![];
-
-    // let mut cursor = 0;
-
-    // while cursor < tokens.len() {
-    //     let current_token = tokens.get(cursor).unwrap();
-
-    //     match current_token.r#type {
-    //         Type::Keyword => match &current_token.value {
-    //             Value::String(string) => match string.as_str() {
-
-    //                 _ => todo!(),
-    //             },
-    //             _ => todo!(),
-    //         },
-    //         _ => todo!(),
-    //     }
-    // }
-
-    expressions
+pub struct Parser {
+    pub tokens: Vec<Token>,
+    pub cursor: usize,
 }
 
-fn build_assignment_expression(tokens: Vec<Token>) -> Expression {
-    let mut token_iter = tokens.into_iter();
+impl Parser {
+    pub fn new(tokens: Vec<Token>) -> Self {
+        Self { tokens, cursor: 0 }
+    }
 
-    let _ = token_iter.next(); // consume the "let"
+    pub fn parse(&mut self) -> AST<'static> {
+        let mut statements: Vec<ASTExpression> = vec![];
 
-    let variable_name = token_iter
-        .next()
-        .expect("Error parsing variable name for assignment expression");
+        while self.peek().r#type != Type::EOF {
+            statements.push(self.parse_statement());
+        }
 
-    let variable_name = match variable_name.r#type {
-        Type::Identifier => match variable_name.value {
-            Value::String(string) => string,
-            _ => panic!("Wrong type for assignment variable name"),
-        },
-        _ => panic!("Wrong type for assignment variable name"),
-    };
+        AST {
+            kind: "Program",
+            statements,
+        }
+    }
 
-    let _ = token_iter.next();
+    fn peek(&self) -> Token {
+        self.tokens[self.cursor].clone()
+    }
 
-    let value = token_iter.next().expect("here").value;
+    fn advance(&mut self) -> Token {
+        let token = self.tokens[self.cursor].clone();
 
-    let assignment_expression = AssignmentExpression {
-        identifier: variable_name,
-        value,
-    };
+        self.cursor += 1;
 
-    let expression = Expression::Assignment(Box::new(assignment_expression));
+        token
+    }
 
-    expression
+    fn parse_statement(&mut self) -> ASTExpression {
+        self.parse_expression()
+    }
+
+    fn parse_expression(&mut self) -> ASTExpression {
+        self.parse_additive_expression()
+    }
+
+    //TODO: fix this
+    fn parse_additive_expression(&mut self) -> ASTExpression {
+        let mut left = self.parse_primary_expression();
+
+        self.cursor += 1;
+
+        while self.peek().value == Value::String("+".to_string())
+            || self.peek().value == Value::String("-".to_string())
+        {
+            let operator = self.advance().value;
+
+            let right = self.parse_primary_expression();
+
+            left = ASTExpression {
+                kind: ASTExpressionKind::BinaryExpression,
+                body: ASTExpressionBody::BinaryExpressionBody(BinaryExpressionBody {
+                    left: Box::new(left),
+                    operator,
+                    right: Box::new(right),
+                }),
+            };
+        }
+
+        left
+    }
+
+    fn parse_primary_expression(&mut self) -> ASTExpression {
+        let token = self.peek();
+
+        match token.r#type {
+            Type::Identifier => ASTExpression {
+                kind: ASTExpressionKind::Identifier,
+                body: ASTExpressionBody::Value(token.value),
+            },
+            Type::Number => ASTExpression {
+                kind: ASTExpressionKind::NumericLiteral,
+                body: ASTExpressionBody::Value(token.value),
+            },
+            Type::String => ASTExpression {
+                kind: ASTExpressionKind::StringLiteral,
+                body: ASTExpressionBody::Value(token.value),
+            },
+            _ => panic!("unexpected token found during parsing: {:?}", token),
+        }
+    }
 }

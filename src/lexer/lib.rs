@@ -1,7 +1,8 @@
 use crate::helpers::is_string::LiteralHelpers;
 use anyhow::{bail, Result};
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq)]
+
 pub enum Type {
     Keyword,
     Identifier,
@@ -12,13 +13,13 @@ pub enum Type {
     EOF,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     String(String),
     Number(f64),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Token {
     pub r#type: Type,
     pub value: Value,
@@ -64,11 +65,15 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                 let mut full_number = String::from(char);
 
                 loop {
-                    let next_char = input.chars().nth(cursor + 1).expect("internal error");
+                    let next_char = input.chars().nth(cursor + 1);
 
-                    match next_char {
+                    if next_char.is_none() {
+                        break;
+                    }
+
+                    match next_char.unwrap() {
                         valid_char if valid_char.is_digit(10) => {
-                            full_number.push(next_char);
+                            full_number.push(next_char.unwrap());
                             cursor += 1;
                             continue;
                         }
