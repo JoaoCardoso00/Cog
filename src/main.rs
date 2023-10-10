@@ -1,9 +1,9 @@
 use std::env;
+mod frontend;
 mod helpers;
-mod lexer;
-mod parser;
+mod runtime;
 
-use crate::{lexer::lib::tokenize, parser::lib::Parser};
+use crate::{frontend::lexer::lib::tokenize, frontend::parser::lib::Parser};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
