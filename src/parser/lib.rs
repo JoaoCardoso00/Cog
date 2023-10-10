@@ -54,12 +54,35 @@ impl Parser {
         self.parse_additive_expression()
     }
 
-    //TODO: fix this
     fn parse_additive_expression(&mut self) -> ASTExpression {
-        let mut left = self.parse_primary_expression();
+        let mut left = self.parse_multiplicative_expression();
 
         while self.peek().value == Value::String("+".to_string())
             || self.peek().value == Value::String("-".to_string())
+        {
+            let operator = self.advance().value;
+
+            let right = self.parse_multiplicative_expression();
+
+            left = ASTExpression {
+                kind: ASTExpressionKind::BinaryExpression,
+                body: ASTExpressionBody::BinaryExpressionBody(BinaryExpressionBody {
+                    left: Box::new(left),
+                    operator,
+                    right: Box::new(right),
+                }),
+            };
+        }
+
+        left
+    }
+
+    fn parse_multiplicative_expression(&mut self) -> ASTExpression {
+        let mut left = self.parse_primary_expression();
+
+        while self.peek().value == Value::String("*".to_string())
+            || self.peek().value == Value::String("/".to_string())
+            || self.peek().value == Value::String("%".to_string())
         {
             let operator = self.advance().value;
 
@@ -86,6 +109,16 @@ impl Parser {
                 kind: ASTExpressionKind::Identifier,
                 body: ASTExpressionBody::Value(token.value),
             },
+            Type::OpenParen => {
+                let value = self.parse_expression();
+                let closing_paren = self.advance();
+
+                if closing_paren.r#type != Type::CloseParen {
+                    panic!("expected closing parenthesis");
+                }
+
+                value
+            }
             Type::Number => ASTExpression {
                 kind: ASTExpressionKind::NumericLiteral,
                 body: ASTExpressionBody::Value(token.value),

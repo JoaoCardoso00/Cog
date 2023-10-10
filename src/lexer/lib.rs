@@ -7,6 +7,8 @@ pub enum Type {
     Keyword,
     Identifier,
     Operator,
+    OpenParen,
+    CloseParen,
     Semi,
     Number,
     String,
@@ -44,6 +46,18 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
             '+' => tokens.push(Token {
                 r#type: Type::Operator,
                 value: Value::String(String::from("+")),
+            }),
+            '%' => tokens.push(Token {
+                r#type: Type::Operator,
+                value: Value::String(String::from("%")),
+            }),
+            '(' => tokens.push(Token {
+                r#type: Type::OpenParen,
+                value: Value::String(String::from("(")),
+            }),
+            ')' => tokens.push(Token {
+                r#type: Type::CloseParen,
+                value: Value::String(String::from(")")),
             }),
             '-' => tokens.push(Token {
                 r#type: Type::Operator,
@@ -118,8 +132,6 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                         None => break,
                     }
                 }
-
-                // dbg!(full_statement.as_str().is_string_literal());
 
                 match full_statement {
                     string if string.is_string_literal() => tokens.push(Token {
