@@ -1,8 +1,8 @@
 use core::panic;
 
 use crate::{
-    lexer::lib::{Token, Type, Value},
-    parser::ast::BinaryExpressionBody,
+    frontend::lexer::lib::{Token, Type, Value},
+    frontend::parser::ast::BinaryExpressionBody,
 };
 
 use super::ast::{ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, AST};

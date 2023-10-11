@@ -1,4 +1,4 @@
-use crate::lexer::lib::Value;
+use crate::frontend::lexer::lib::Value;
 
 #[derive(Debug)]
 pub struct AST<'a> {
@@ -42,5 +42,5 @@ pub struct BinaryExpressionBody {
 
 #[derive(Debug)]
 pub struct ASTStatement {
-    kind: ASTStatementKind,
+    pub kind: ASTStatementKind,
 }
