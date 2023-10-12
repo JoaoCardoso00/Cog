@@ -58,7 +58,10 @@ fn evaluate_statement(ast_node: ASTStatement) -> RuntimeValue {
                 evaluate_binary_expression(binary_exp)
             }
 
-            _ => panic!("Invalid expression type"),
+            _ => panic!(
+                "This expression type is not supported yet: {:?}",
+                expression
+            ),
         },
         _ => todo!(),
     }

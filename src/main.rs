@@ -3,9 +3,8 @@ mod frontend;
 mod helpers;
 mod runtime;
 
-use runtime::interpreter::lib::evaluate;
-
 use crate::{frontend::lexer::lib::tokenize, frontend::parser::lib::Parser};
+use runtime::interpreter::lib::evaluate;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
