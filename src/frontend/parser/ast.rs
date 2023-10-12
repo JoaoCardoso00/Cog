@@ -3,7 +3,7 @@ use crate::frontend::lexer::lib::Value;
 #[derive(Debug)]
 pub struct AST<'a> {
     pub(crate) kind: &'a str,
-    pub statements: Vec<ASTExpression>,
+    pub statements: Vec<ASTStatement>,
 }
 
 #[derive(Debug)]

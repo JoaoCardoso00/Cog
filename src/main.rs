@@ -3,6 +3,8 @@ mod frontend;
 mod helpers;
 mod runtime;
 
+use runtime::interpreter::lib::evaluate;
+
 use crate::{frontend::lexer::lib::tokenize, frontend::parser::lib::Parser};
 
 fn main() {
@@ -21,5 +23,7 @@ fn main() {
 
     let ast = parser.parse();
 
-    dbg!(ast);
+    let res = evaluate(ast);
+
+    dbg!(res);
 }

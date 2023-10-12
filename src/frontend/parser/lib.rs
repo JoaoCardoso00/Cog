@@ -5,7 +5,9 @@ use crate::{
     frontend::parser::ast::BinaryExpressionBody,
 };
 
-use super::ast::{ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, AST};
+use super::ast::{
+    ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, ASTStatementKind, AST,
+};
 
 pub struct Parser {
     pub tokens: Vec<Token>,
@@ -34,7 +36,7 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> AST<'static> {
-        let mut statements: Vec<ASTExpression> = vec![];
+        let mut statements: Vec<ASTStatement> = vec![];
 
         while self.not_eof() {
             statements.push(self.parse_statement());
@@ -46,8 +48,12 @@ impl Parser {
         }
     }
 
-    fn parse_statement(&mut self) -> ASTExpression {
-        self.parse_expression()
+    fn parse_statement(&mut self) -> ASTStatement {
+        let expression = self.parse_expression();
+
+        ASTStatement {
+            kind: ASTStatementKind::ExpressionStatement(expression),
+        }
     }
 
     fn parse_expression(&mut self) -> ASTExpression {
