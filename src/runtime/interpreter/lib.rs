@@ -128,8 +128,13 @@ fn evaluate_numeric_binary_expression(
             "+" => left_hand_side + right_hand_side,
             "-" => left_hand_side - right_hand_side,
             "*" => left_hand_side * right_hand_side,
-            //TODO: Handle division by zero
-            "/" => left_hand_side / right_hand_side,
+            "/" => {
+                if right_hand_side == 0.0 {
+                    panic!("Division by zero");
+                }
+
+                left_hand_side / right_hand_side
+            }
             "%" => left_hand_side % right_hand_side,
             _ => panic!("Invalid operator"),
         },
