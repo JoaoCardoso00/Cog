@@ -86,7 +86,7 @@ fn evaluate_binary_expression(binary_exp: BinaryExpressionBody) -> RuntimeValue 
     let right_hand_side = evaluate_statement(right_hand_side_statement);
 
     if matches!(left_hand_side.value_type, ValueType::Number(_))
-        || matches!(right_hand_side.value_type, ValueType::Number(_))
+        && matches!(right_hand_side.value_type, ValueType::Number(_))
     {
         return RuntimeValue {
             value_type: ValueType::Number(evaluate_numeric_binary_expression(
