@@ -2,7 +2,7 @@ use core::panic;
 
 use crate::{
     frontend::lexer::lib::{Token, Type, Value},
-    frontend::parser::ast::BinaryExpressionBody,
+    frontend::{lexer::lib::tokenize, parser::ast::BinaryExpressionBody},
 };
 
 use super::ast::{
@@ -15,8 +15,15 @@ pub struct Parser {
 }
 
 impl Parser {
-    pub fn new(tokens: Vec<Token>) -> Self {
+    pub fn new(file_contents: String) -> Self {
+        let tokens = Self::from_input(file_contents);
         Self { tokens, cursor: 0 }
+    }
+
+    fn from_input(file_contents: String) -> Vec<Token> {
+        let tokens = tokenize(&file_contents);
+
+        tokens.unwrap()
     }
 
     fn not_eof(&self) -> bool {
