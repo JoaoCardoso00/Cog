@@ -16,14 +16,8 @@ pub struct Parser {
 
 impl Parser {
     pub fn new(file_contents: String) -> Self {
-        let tokens = Self::from_input(file_contents);
+        let tokens = tokenize(&file_contents).unwrap();
         Self { tokens, cursor: 0 }
-    }
-
-    fn from_input(file_contents: String) -> Vec<Token> {
-        let tokens = tokenize(&file_contents);
-
-        tokens.unwrap()
     }
 
     fn not_eof(&self) -> bool {
