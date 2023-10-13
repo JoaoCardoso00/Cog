@@ -17,7 +17,6 @@ pub enum ASTExpressionKind {
     Identifier,
     StringLiteral,
     NumericLiteral,
-    NullLiteral,
     BinaryExpression,
 }
 

@@ -6,47 +6,40 @@ use crate::{
             BinaryExpressionBody, AST,
         },
     },
-    runtime::values::{NullValue, NumberValue, RuntimeValue, ValueType},
+    helpers::build_null_runtime_value::build_null_runtime_value,
+    runtime::{
+        environment::Environment,
+        values::{NumberValue, RuntimeValue, ValueType, ValueTypes},
+    },
 };
 
-pub fn evaluate(ast: AST) -> RuntimeValue {
+pub fn evaluate(ast: AST, env: Environment) -> RuntimeValue {
     match ast.kind {
-        "Program" => evaluate_program(ast),
+        "Program" => evaluate_program(ast, env),
         _ => panic!("Unknown AST kind: {}", ast.kind),
     }
 }
 
-fn evaluate_program(ast: AST) -> RuntimeValue {
-    let mut last_evaluated = RuntimeValue {
-        value_type: ValueType::Null(NullValue {
-            r#type: "Null".to_string(),
-            value: "null".to_string(),
-        }),
-    };
+fn evaluate_program(ast: AST, env: Environment) -> RuntimeValue {
+    let mut last_evaluated = build_null_runtime_value();
 
     for statement in ast.statements {
-        last_evaluated = evaluate_statement(statement);
+        last_evaluated = evaluate_statement(statement, env.clone());
     }
 
     last_evaluated
 }
 
-fn evaluate_statement(ast_node: ASTStatement) -> RuntimeValue {
+fn evaluate_statement(ast_node: ASTStatement, env: Environment) -> RuntimeValue {
     match ast_node.kind {
         ASTStatementKind::ExpressionStatement(expression) => match expression.kind {
             ASTExpressionKind::NumericLiteral => RuntimeValue {
                 value_type: ValueType::Number(NumberValue {
-                    r#type: "number".to_string(),
+                    r#type: ValueTypes::Number,
                     value: match expression.body {
                         ASTExpressionBody::Value(Value::Number(value)) => value,
                         _ => panic!("Invalid value type"),
                     },
-                }),
-            },
-            ASTExpressionKind::NullLiteral => RuntimeValue {
-                value_type: ValueType::Null(NullValue {
-                    r#type: "null".to_string(),
-                    value: "null".to_string(),
                 }),
             },
             ASTExpressionKind::BinaryExpression => {
@@ -55,7 +48,16 @@ fn evaluate_statement(ast_node: ASTStatement) -> RuntimeValue {
                     _ => panic!("Invalid expression type"),
                 };
 
-                evaluate_binary_expression(binary_exp)
+                evaluate_binary_expression(binary_exp, env)
+            }
+
+            ASTExpressionKind::Identifier => {
+                let identifier = match expression.body {
+                    ASTExpressionBody::Value(Value::String(value)) => value,
+                    _ => panic!("Invalid value type"),
+                };
+
+                evaluate_identifier_expression(identifier, env)
             }
 
             _ => panic!(
@@ -67,7 +69,12 @@ fn evaluate_statement(ast_node: ASTStatement) -> RuntimeValue {
     }
 }
 
-fn evaluate_binary_expression(binary_exp: BinaryExpressionBody) -> RuntimeValue {
+fn evaluate_identifier_expression(identifier: String, mut env: Environment) -> RuntimeValue {
+    let val = env.peek_variable(identifier);
+    val
+}
+
+fn evaluate_binary_expression(binary_exp: BinaryExpressionBody, env: Environment) -> RuntimeValue {
     let left_hand_side_statement = ASTStatement {
         kind: ASTStatementKind::ExpressionStatement(ASTExpression {
             kind: binary_exp.left.kind,
@@ -82,8 +89,8 @@ fn evaluate_binary_expression(binary_exp: BinaryExpressionBody) -> RuntimeValue 
         }),
     };
 
-    let left_hand_side = evaluate_statement(left_hand_side_statement);
-    let right_hand_side = evaluate_statement(right_hand_side_statement);
+    let left_hand_side = evaluate_statement(left_hand_side_statement, env.clone());
+    let right_hand_side = evaluate_statement(right_hand_side_statement, env);
 
     if matches!(left_hand_side.value_type, ValueType::Number(_))
         && matches!(right_hand_side.value_type, ValueType::Number(_))
@@ -97,12 +104,7 @@ fn evaluate_binary_expression(binary_exp: BinaryExpressionBody) -> RuntimeValue 
         };
     }
 
-    RuntimeValue {
-        value_type: ValueType::Null(NullValue {
-            r#type: "null".to_string(),
-            value: "null".to_string(),
-        }),
-    }
+    build_null_runtime_value()
 }
 
 fn evaluate_numeric_binary_expression(
@@ -142,7 +144,7 @@ fn evaluate_numeric_binary_expression(
     };
 
     NumberValue {
-        r#type: "number".to_string(),
+        r#type: ValueTypes::Number,
         value: result,
     }
 }

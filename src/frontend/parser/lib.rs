@@ -129,10 +129,6 @@ impl Parser {
                 kind: ASTExpressionKind::NumericLiteral,
                 body: ASTExpressionBody::Value(token.value),
             },
-            Type::Null => ASTExpression {
-                kind: ASTExpressionKind::NullLiteral,
-                body: ASTExpressionBody::Value(token.value),
-            },
             Type::String => ASTExpression {
                 kind: ASTExpressionKind::StringLiteral,
                 body: ASTExpressionBody::Value(token.value),
