@@ -20,10 +20,17 @@ pub struct VariableDeclaration {
 }
 
 #[derive(Debug)]
+pub struct VariableAssignment {
+    pub(crate) assignee: Box<ASTExpression>,
+    pub(crate) value: Box<ASTExpression>,
+}
+
+#[derive(Debug, PartialEq)]
 pub enum ASTExpressionKind {
     Identifier,
     StringLiteral,
     NumericLiteral,
+    AssignmentExpression,
     BinaryExpression,
 }
 
@@ -37,6 +44,7 @@ pub struct ASTExpression {
 pub enum ASTExpressionBody {
     Value(Value),
     BinaryExpressionBody(BinaryExpressionBody),
+    AssignmentExpressionBody(VariableAssignment),
 }
 
 #[derive(Debug)]

@@ -4,7 +4,7 @@ use crate::{
     frontend::lexer::lib::{Token, Type, Value},
     frontend::{
         lexer::lib::tokenize,
-        parser::ast::{BinaryExpressionBody, VariableDeclaration},
+        parser::ast::{BinaryExpressionBody, VariableAssignment, VariableDeclaration},
     },
 };
 
@@ -108,7 +108,27 @@ impl Parser {
     }
 
     fn parse_expression(&mut self) -> ASTExpression {
-        self.parse_additive_expression()
+        self.parse_assignment_expression()
+    }
+
+    fn parse_assignment_expression(&mut self) -> ASTExpression {
+        let left = self.parse_additive_expression(); //TODO: switch this out with object_expression
+
+        if self.peek().r#type == Type::Equals {
+            self.advance();
+
+            let value = self.parse_assignment_expression();
+
+            return ASTExpression {
+                kind: ASTExpressionKind::AssignmentExpression,
+                body: ASTExpressionBody::AssignmentExpressionBody(VariableAssignment {
+                    assignee: Box::new(left),
+                    value: Box::new(value),
+                }),
+            };
+        }
+
+        left
     }
 
     fn parse_additive_expression(&mut self) -> ASTExpression {

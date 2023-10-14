@@ -1,4 +1,6 @@
-use super::expressions::{evaluate_binary_expression, evaluate_identifier_expression};
+use super::expressions::{
+    evaluate_assignment_expression, evaluate_binary_expression, evaluate_identifier_expression,
+};
 use crate::{
     frontend::{
         lexer::lib::Value,
@@ -45,7 +47,14 @@ pub fn evaluate_statement(ast_node: ASTStatement, env: &mut Environment) -> Runt
 
                 evaluate_binary_expression(binary_exp, env)
             }
+            ASTExpressionKind::AssignmentExpression => {
+                let assignment_exp = match expression.body {
+                    ASTExpressionBody::AssignmentExpressionBody(assignment_exp) => assignment_exp,
+                    _ => panic!("Invalid expression type"),
+                };
 
+                evaluate_assignment_expression(assignment_exp, env)
+            }
             ASTExpressionKind::Identifier => {
                 let identifier = match expression.body {
                     ASTExpressionBody::Value(Value::String(value)) => value,
@@ -54,7 +63,6 @@ pub fn evaluate_statement(ast_node: ASTStatement, env: &mut Environment) -> Runt
 
                 evaluate_identifier_expression(identifier, env)
             }
-
             _ => panic!(
                 "This expression type is not supported yet: {:?}",
                 expression
@@ -90,5 +98,9 @@ pub fn evaluate_variable_declaration(
         None => build_null_runtime_value(),
     };
 
-    env.declare_variable(variable_identifier, variable_value, variable_declaration_statement.constant)
+    env.declare_variable(
+        variable_identifier,
+        variable_value,
+        variable_declaration_statement.constant,
+    )
 }

@@ -1,7 +1,10 @@
 use crate::{
     frontend::{
         lexer::lib::Value,
-        parser::ast::{ASTExpression, ASTStatement, ASTStatementKind, BinaryExpressionBody},
+        parser::ast::{
+            ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, ASTStatementKind,
+            BinaryExpressionBody, VariableAssignment,
+        },
     },
     helpers::build_null_runtime_value::build_null_runtime_value,
     runtime::{
@@ -96,4 +99,28 @@ pub fn evaluate_numeric_binary_expression(
         r#type: ValueTypes::Number,
         value: result,
     }
+}
+
+pub fn evaluate_assignment_expression(
+    node: VariableAssignment,
+    mut env: &mut Environment,
+) -> RuntimeValue {
+    if node.assignee.kind != ASTExpressionKind::Identifier {
+        panic!("Invalid assignee type");
+    }
+
+    let variable_name = match node.assignee.body {
+        ASTExpressionBody::Value(Value::String(value)) => value,
+        _ => panic!("Invalid value type"),
+    };
+
+    let value_statement = ASTStatement {
+        kind: ASTStatementKind::ExpressionStatement(ASTExpression {
+            kind: node.value.kind,
+            body: node.value.body,
+        }),
+    };
+
+    let value_to_assign = evaluate_statement(value_statement, env);
+    env.assign_variable(variable_name, value_to_assign)
 }
