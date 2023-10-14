@@ -1,2 +1,2 @@
-pub mod error;
-pub mod lib;
+pub(crate) mod error;
+pub(crate) mod lib;

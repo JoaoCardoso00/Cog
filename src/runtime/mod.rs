@@ -1,3 +1,3 @@
-pub mod environment;
-pub mod interpreter;
-pub mod values;
+pub(crate) mod environment;
+pub(crate) mod interpreter;
+pub(crate) mod values;

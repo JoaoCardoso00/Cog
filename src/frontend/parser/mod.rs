@@ -1,2 +1,2 @@
-pub mod ast;
-pub mod lib;
+pub(crate) mod ast;
+pub(crate) mod lib;

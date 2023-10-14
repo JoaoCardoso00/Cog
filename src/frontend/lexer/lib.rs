@@ -23,8 +23,8 @@ pub enum Value {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Token {
-    pub r#type: Type,
-    pub value: Value,
+    pub(crate) r#type: Type,
+    pub(crate) value: Value,
 }
 
 pub fn tokenize(input: &String) -> Result<Vec<Token>> {
@@ -169,6 +169,10 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                     "let" => tokens.push(Token {
                         r#type: Type::Keyword,
                         value: Value::String(String::from("let")),
+                    }),
+                    "const" => tokens.push(Token {
+                        r#type: Type::Keyword,
+                        value: Value::String(String::from("const")),
                     }),
                     _ => tokens.push(Token {
                         r#type: Type::Identifier,

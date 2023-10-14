@@ -3,13 +3,20 @@ use crate::frontend::lexer::lib::Value;
 #[derive(Debug)]
 pub struct AST<'a> {
     pub(crate) kind: &'a str,
-    pub statements: Vec<ASTStatement>,
+    pub(crate) statements: Vec<ASTStatement>,
 }
 
 #[derive(Debug)]
 pub enum ASTStatementKind {
     ExpressionStatement(ASTExpression),
-    VariableDeclaration,
+    VariableDeclaration(VariableDeclaration),
+}
+
+#[derive(Debug)]
+pub struct VariableDeclaration {
+    pub(crate) constant: bool,
+    pub(crate) identifier: Value,
+    pub(crate) value: Option<ASTExpression>,
 }
 
 #[derive(Debug)]
@@ -41,5 +48,5 @@ pub struct BinaryExpressionBody {
 
 #[derive(Debug)]
 pub struct ASTStatement {
-    pub kind: ASTStatementKind,
+    pub(crate) kind: ASTStatementKind,
 }
