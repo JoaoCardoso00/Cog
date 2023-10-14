@@ -4,12 +4,21 @@ use anyhow::{bail, Result};
 #[derive(Debug, Copy, Clone, PartialEq)]
 
 pub enum Type {
-    Keyword,
+    // identifier
     Identifier,
+
+    // variable declaration
+    Let,
+    Const,
+
+    // operators
     Operator,
     OpenParen,
     CloseParen,
     Semi,
+    Equals,
+
+    // values
     Number,
     String,
     EOF,
@@ -40,7 +49,7 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
             ' ' => {}
             NEW_LINE_CHARACTER => {}
             '=' => tokens.push(Token {
-                r#type: Type::Operator,
+                r#type: Type::Equals,
                 value: Value::String(String::from("=")),
             }),
             '+' => tokens.push(Token {
@@ -167,11 +176,11 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                 // statement can be either keyword, string or identifier
                 match full_statement.as_str() {
                     "let" => tokens.push(Token {
-                        r#type: Type::Keyword,
+                        r#type: Type::Let,
                         value: Value::String(String::from("let")),
                     }),
                     "const" => tokens.push(Token {
-                        r#type: Type::Keyword,
+                        r#type: Type::Const,
                         value: Value::String(String::from("const")),
                     }),
                     _ => tokens.push(Token {

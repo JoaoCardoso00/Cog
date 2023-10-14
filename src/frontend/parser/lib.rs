@@ -2,7 +2,10 @@ use core::panic;
 
 use crate::{
     frontend::lexer::lib::{Token, Type, Value},
-    frontend::{lexer::lib::tokenize, parser::ast::BinaryExpressionBody},
+    frontend::{
+        lexer::lib::tokenize,
+        parser::ast::{BinaryExpressionBody, VariableDeclaration},
+    },
 };
 
 use super::ast::{
@@ -50,11 +53,58 @@ impl Parser {
     }
 
     fn parse_statement(&mut self) -> ASTStatement {
-        let expression = self.parse_expression();
-
-        ASTStatement {
-            kind: ASTStatementKind::ExpressionStatement(expression),
+        match self.peek().r#type {
+            Type::Let | Type::Const => self.parse_variable_declaration(),
+            _ => ASTStatement {
+                kind: ASTStatementKind::ExpressionStatement(self.parse_expression()),
+            },
         }
+    }
+
+    fn parse_variable_declaration(&mut self) -> ASTStatement {
+        let is_constant = self.advance().r#type == Type::Const;
+
+        let identifier = self.advance();
+        let identifier = match identifier.r#type {
+            Type::Identifier => identifier.value,
+            _ => panic!("expected identifier"),
+        };
+
+        if self.peek().r#type == Type::Semi {
+            self.advance();
+            match is_constant {
+                true => panic!("Constants need to be declared with a value, no value provided"),
+                false => {
+                    return ASTStatement {
+                        kind: ASTStatementKind::VariableDeclaration(VariableDeclaration {
+                            constant: false,
+                            identifier,
+                            value: None,
+                        }),
+                    }
+                }
+            }
+        }
+
+        match self.advance().r#type {
+            Type::Equals => (),
+            _ => panic!("expected \"=\" at variable declaration"),
+        };
+
+        let declaration = ASTStatement {
+            kind: ASTStatementKind::VariableDeclaration(VariableDeclaration {
+                constant: is_constant,
+                identifier,
+                value: Some(self.parse_expression()),
+            }),
+        };
+
+        match self.advance().r#type {
+            Type::Semi => (),
+            _ => panic!("expected \";\" at variable declaration"),
+        };
+
+        declaration
     }
 
     fn parse_expression(&mut self) -> ASTExpression {

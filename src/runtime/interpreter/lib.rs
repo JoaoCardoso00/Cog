@@ -65,7 +65,7 @@ fn evaluate_statement(ast_node: ASTStatement, env: Environment) -> RuntimeValue 
                 expression
             ),
         },
-        _ => todo!(),
+        _ => panic!("This statement type is not supported yet: {:?}", ast_node),
     }
 }
 
