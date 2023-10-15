@@ -1,4 +1,4 @@
-use crate::helpers::is_string::LiteralHelpers;
+use crate::{frontend::parser::ast::ASTExpression, helpers::is_string::LiteralHelpers};
 use anyhow::{bail, Result};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -12,11 +12,15 @@ pub enum Type {
     Const,
 
     // operators
-    Operator,
-    OpenParen,
-    CloseParen,
-    Semi,
-    Equals,
+    Operator,   // +, -, *, /
+    OpenParen,  // (
+    CloseParen, // )
+    Comma,      // ,
+    Colon,      // :
+    OpenBrace,  // {
+    CloseBrace, // }
+    Semi,       // ;
+    Equals,     // =
 
     // values
     Number,
@@ -28,6 +32,18 @@ pub enum Type {
 pub enum Value {
     String(String),
     Number(f64),
+    Object(Object),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Object {
+    pub(crate) properties: Vec<Property>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Property {
+    pub(crate) key: String,
+    pub(crate) value: Option<ASTExpression>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -38,9 +54,11 @@ pub struct Token {
 
 pub fn tokenize(input: &String) -> Result<Vec<Token>> {
     const NEW_LINE_CHARACTER: char = 0xA as char;
+    let operators = vec![
+        '+', '-', '*', '/', '%', ':', '=', '(', ')', '{', '}', ';', ',',
+    ];
     let mut tokens: Vec<Token> = vec![];
     let mut cursor: usize = 0;
-    // let lines: Vec<&str> = input.lines().collect();
 
     while cursor < input.len() {
         let char = input.chars().nth(cursor).expect("internal error");
@@ -55,6 +73,22 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
             '+' => tokens.push(Token {
                 r#type: Type::Operator,
                 value: Value::String(String::from("+")),
+            }),
+            ',' => tokens.push(Token {
+                r#type: Type::Comma,
+                value: Value::String(String::from(",")),
+            }),
+            ':' => tokens.push(Token {
+                r#type: Type::Colon,
+                value: Value::String(String::from(":")),
+            }),
+            '{' => tokens.push(Token {
+                r#type: Type::OpenBrace,
+                value: Value::String(String::from("[")),
+            }),
+            '}' => tokens.push(Token {
+                r#type: Type::CloseBrace,
+                value: Value::String(String::from("]")),
             }),
             '%' => tokens.push(Token {
                 r#type: Type::Operator,
@@ -102,6 +136,7 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                         }
                         ';' => break,
                         ' ' => break,
+                        operator if operators.contains(&operator) => break,
                         _ => bail!("Unable to read character at position {}", cursor + 1),
                     }
                 }
@@ -162,6 +197,7 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                     match next_char {
                         Some(next_char) => match next_char {
                             ' ' => break,
+                            // operator if operators.contains(&operator) => break,
                             valid_char if valid_char.is_alphabetic() => {
                                 full_statement.push(next_char);
                                 cursor += 1;

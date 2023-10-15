@@ -1,5 +1,6 @@
 use super::expressions::{
     evaluate_assignment_expression, evaluate_binary_expression, evaluate_identifier_expression,
+    evaluate_object_expression,
 };
 use crate::{
     frontend::{
@@ -54,6 +55,14 @@ pub fn evaluate_statement(ast_node: ASTStatement, env: &mut Environment) -> Runt
                 };
 
                 evaluate_assignment_expression(assignment_exp, env)
+            }
+            ASTExpressionKind::ObjectLiteral => {
+                let object = match expression.body {
+                    ASTExpressionBody::Value(Value::Object(object)) => object,
+                    _ => panic!("Invalid value type"),
+                };
+
+                evaluate_object_expression(object, env)
             }
             ASTExpressionKind::Identifier => {
                 let identifier = match expression.body {

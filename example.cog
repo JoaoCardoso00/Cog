@@ -1,3 +1,10 @@
-let x = 5;
+const foo = 45 / 10;
 
-x = x + 2
+const obj = {
+    x: 100,
+    y: 32,
+    foo,
+    complex: {
+        bar: true,
+    },
+};

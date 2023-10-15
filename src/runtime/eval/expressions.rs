@@ -1,6 +1,8 @@
+use std::collections::HashMap;
+
 use crate::{
     frontend::{
-        lexer::lib::Value,
+        lexer::lib::{Object, Property, Value},
         parser::ast::{
             ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, ASTStatementKind,
             BinaryExpressionBody, VariableAssignment,
@@ -9,7 +11,7 @@ use crate::{
     helpers::build_null_runtime_value::build_null_runtime_value,
     runtime::{
         environment::Environment,
-        values::{NumberValue, RuntimeValue, ValueType, ValueTypes},
+        values::{NumberValue, ObjectValue, RuntimeValue, ValueType, ValueTypes},
     },
 };
 
@@ -123,4 +125,36 @@ pub fn evaluate_assignment_expression(
 
     let value_to_assign = evaluate_statement(value_statement, env);
     env.assign_variable(variable_name, value_to_assign)
+}
+
+pub fn evaluate_object_expression(obj: Object, env: &mut Environment) -> RuntimeValue {
+    let mut object = ObjectValue {
+        r#type: ValueTypes::Object,
+        properties: HashMap::new(),
+    };
+
+    for property in obj.properties {
+        let key = property.key;
+        let value = property.value;
+
+        let runtime_value: RuntimeValue = match value {
+            Some(value) => {
+                let value_statement = ASTStatement {
+                    kind: ASTStatementKind::ExpressionStatement(ASTExpression {
+                        kind: value.kind,
+                        body: value.body,
+                    }),
+                };
+
+                evaluate_statement(value_statement, env)
+            }
+            None => env.peek_variable(key.clone()),
+        };
+
+        object.properties.insert(key, runtime_value);
+    }
+
+    RuntimeValue {
+        value_type: ValueType::Object(object),
+    }
 }

@@ -3,7 +3,7 @@ use core::panic;
 use crate::{
     frontend::lexer::lib::{Token, Type, Value},
     frontend::{
-        lexer::lib::tokenize,
+        lexer::lib::{tokenize, Object, Property},
         parser::ast::{BinaryExpressionBody, VariableAssignment, VariableDeclaration},
     },
 };
@@ -112,7 +112,7 @@ impl Parser {
     }
 
     fn parse_assignment_expression(&mut self) -> ASTExpression {
-        let left = self.parse_additive_expression(); //TODO: switch this out with object_expression
+        let left = self.parse_object_expression(); //TODO: switch this out with object_expression
 
         if self.peek().r#type == Type::Equals {
             self.advance();
@@ -129,6 +129,72 @@ impl Parser {
         }
 
         left
+    }
+
+    fn parse_object_expression(&mut self) -> ASTExpression {
+        if self.peek().r#type != Type::OpenBrace {
+            return self.parse_additive_expression();
+        }
+
+        self.advance();
+        let mut properties: Vec<Property> = vec![];
+
+        while self.not_eof() && self.peek().r#type != Type::CloseBrace {
+            let key = self.advance();
+
+            if key.r#type != Type::Identifier {
+                panic!("expected identifier");
+            }
+
+            let key = match key.value {
+                Value::String(value) => value,
+                _ => panic!("expected string"),
+            };
+
+            match self.peek().r#type {
+                Type::Comma => {
+                    self.advance(); // consume comma
+                    properties.push(Property { key, value: None });
+                    continue;
+                }
+                Type::CloseBrace => {
+                    properties.push(Property { key, value: None });
+                    continue;
+                }
+                _ => (),
+            }
+
+            match self.advance().r#type {
+                Type::Colon => (),
+                _ => panic!("expected colon"),
+            }
+
+            let value = self.parse_expression();
+
+            properties.push(Property {
+                key,
+                value: Some(value),
+            });
+
+            if self.peek().r#type != Type::CloseBrace {
+                let comma = self.advance();
+
+                if comma.r#type != Type::Comma {
+                    panic!("expected comma");
+                }
+            }
+        }
+
+        let closing_brace = self.advance();
+
+        if closing_brace.r#type != Type::CloseBrace {
+            panic!("expected closing brace");
+        }
+
+        ASTExpression {
+            kind: ASTExpressionKind::ObjectLiteral,
+            body: ASTExpressionBody::Value(Value::Object(Object { properties })),
+        }
     }
 
     fn parse_additive_expression(&mut self) -> ASTExpression {

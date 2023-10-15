@@ -1,6 +1,18 @@
 use std::collections::{HashMap, HashSet};
 
+use crate::helpers::{
+    build_bool_runtime_value::build_bool_runtime_value,
+    build_null_runtime_value::build_null_runtime_value,
+};
+
 use super::values::RuntimeValue;
+
+pub fn build_scope(mut env: &mut Environment) {
+    // Global variables
+    env.declare_variable("true".to_string(), build_bool_runtime_value(true), true);
+    env.declare_variable("false".to_string(), build_bool_runtime_value(false), true);
+    env.declare_variable("null".to_string(), build_null_runtime_value(), true);
+}
 
 #[derive(Debug, Clone)]
 pub struct Environment {
@@ -11,14 +23,25 @@ pub struct Environment {
 
 impl Environment {
     pub fn new(parent: Option<Environment>) -> Self {
-        Self {
+        let is_global = match &parent {
+            Some(_) => false,
+            None => true,
+        };
+
+        let mut env = Environment {
             parent: match parent {
                 Some(parent) => Some(Box::new(parent)),
                 None => None,
             },
             variables: HashMap::new(),
             constants: HashSet::new(),
+        };
+
+        if is_global {
+            build_scope(&mut env);
         }
+
+        env
     }
 
     pub fn declare_variable(
