@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     frontend::{
-        lexer::lib::{Object, Property, Value},
+        lexer::lib::{Object, Value},
         parser::ast::{
             ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, ASTStatementKind,
             BinaryExpressionBody, VariableAssignment,
@@ -17,10 +17,7 @@ use crate::{
 
 use super::statements::evaluate_statement;
 
-pub fn evaluate_identifier_expression(
-    identifier: String,
-    mut env: &mut Environment,
-) -> RuntimeValue {
+pub fn evaluate_identifier_expression(identifier: String, env: &mut Environment) -> RuntimeValue {
     let val = env.peek_variable(identifier);
     val
 }
@@ -105,7 +102,7 @@ pub fn evaluate_numeric_binary_expression(
 
 pub fn evaluate_assignment_expression(
     node: VariableAssignment,
-    mut env: &mut Environment,
+    env: &mut Environment,
 ) -> RuntimeValue {
     if node.assignee.kind != ASTExpressionKind::Identifier {
         panic!("Invalid assignee type");

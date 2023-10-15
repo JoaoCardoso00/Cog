@@ -7,7 +7,7 @@ use crate::helpers::{
 
 use super::values::RuntimeValue;
 
-pub fn build_scope(mut env: &mut Environment) {
+pub fn build_scope(env: &mut Environment) {
     // Global variables
     env.declare_variable("true".to_string(), build_bool_runtime_value(true), true);
     env.declare_variable("false".to_string(), build_bool_runtime_value(false), true);

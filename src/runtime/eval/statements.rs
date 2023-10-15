@@ -13,7 +13,6 @@ use crate::{
     helpers::build_null_runtime_value::build_null_runtime_value,
     runtime::{
         environment::Environment,
-        interpreter::lib::evaluate,
         values::{NumberValue, RuntimeValue, ValueType, ValueTypes},
     },
 };

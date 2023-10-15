@@ -14,7 +14,7 @@ pub enum ValueTypes {
     Number,
     Boolean,
     Object,
-    String,
+    // String,
 }
 
 #[derive(Debug, Clone)]
