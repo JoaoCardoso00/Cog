@@ -4,7 +4,10 @@ use crate::{
     frontend::lexer::lib::{Token, Type, Value},
     frontend::{
         lexer::lib::{tokenize, Object, Property},
-        parser::ast::{BinaryExpressionBody, VariableAssignment, VariableDeclaration},
+        parser::ast::{
+            BinaryExpression, CallExpression, MemberExpression, VariableAssignment,
+            VariableDeclaration,
+        },
     },
 };
 
@@ -209,7 +212,7 @@ impl Parser {
 
             left = ASTExpression {
                 kind: ASTExpressionKind::BinaryExpression,
-                body: ASTExpressionBody::BinaryExpressionBody(BinaryExpressionBody {
+                body: ASTExpressionBody::BinaryExpressionBody(BinaryExpression {
                     left: Box::new(left),
                     operator,
                     right: Box::new(right),
@@ -221,7 +224,7 @@ impl Parser {
     }
 
     fn parse_multiplicative_expression(&mut self) -> ASTExpression {
-        let mut left = self.parse_primary_expression();
+        let mut left = self.parse_call_member_expression();
 
         while self.peek().value == Value::String("*".to_string())
             || self.peek().value == Value::String("/".to_string())
@@ -233,7 +236,7 @@ impl Parser {
 
             left = ASTExpression {
                 kind: ASTExpressionKind::BinaryExpression,
-                body: ASTExpressionBody::BinaryExpressionBody(BinaryExpressionBody {
+                body: ASTExpressionBody::BinaryExpressionBody(BinaryExpression {
                     left: Box::new(left),
                     operator,
                     right: Box::new(right),
@@ -242,6 +245,107 @@ impl Parser {
         }
 
         left
+    }
+
+    fn parse_call_member_expression(&mut self) -> ASTExpression {
+        let member = self.parse_member_expression();
+
+        if self.peek().r#type == Type::OpenParen {
+            return self.parse_call_expression(member);
+        }
+
+        member
+    }
+
+    fn parse_call_expression(&mut self, caller: ASTExpression) -> ASTExpression {
+        let mut call_expression = ASTExpression {
+            kind: ASTExpressionKind::CallExpression,
+            body: ASTExpressionBody::CallExpressionBody(CallExpression {
+                arguments: self.parse_arguments(),
+                caller: Box::new(caller),
+            }),
+        };
+
+        if self.peek().r#type == Type::OpenParen {
+            call_expression = self.parse_call_expression(call_expression);
+        }
+
+        call_expression
+    }
+
+    fn parse_arguments(&mut self) -> Vec<ASTExpression> {
+        let open_paren = self.advance();
+
+        if open_paren.r#type != Type::OpenParen {
+            panic!("expected opening parenthesis");
+        }
+
+        let arguments = match self.peek().r#type {
+            Type::CloseParen => vec![],
+            _ => self.parse_arguments_list(),
+        };
+
+        let closing_paren = self.advance();
+
+        if closing_paren.r#type != Type::CloseParen {
+            panic!("missing closing parenthesis");
+        }
+
+        arguments
+    }
+
+    fn parse_arguments_list(&mut self) -> Vec<ASTExpression> {
+        let mut arguments = vec![self.parse_assignment_expression()];
+
+        while self.peek().r#type == Type::Comma && self.not_eof() {
+            self.advance();
+            arguments.push(self.parse_assignment_expression());
+        }
+
+        arguments
+    }
+
+    fn parse_member_expression(&mut self) -> ASTExpression {
+        let mut object = self.parse_primary_expression();
+
+        while self.peek().r#type == Type::Dot || self.peek().r#type == Type::OpenBracket {
+            let operator = self.advance();
+            let property: ASTExpression;
+            let computed: bool;
+
+            match operator.r#type {
+                Type::Dot => {
+                    property = self.parse_primary_expression();
+                    computed = false;
+
+                    if property.kind != ASTExpressionKind::Identifier {
+                        panic!("expected identifier");
+                    }
+                }
+
+                _ => {
+                    computed = true;
+                    property = self.parse_expression();
+
+                    let closing_bracket = self.advance();
+
+                    if closing_bracket.r#type != Type::CloseBracket {
+                        panic!("expected closing bracket");
+                    }
+                }
+            }
+
+            object = ASTExpression {
+                kind: ASTExpressionKind::MemberExpression,
+                body: ASTExpressionBody::MemberExpressionBody(MemberExpression {
+                    object: Box::new(object),
+                    property: Box::new(property),
+                    computed,
+                }),
+            };
+        }
+
+        object
     }
 
     fn parse_primary_expression(&mut self) -> ASTExpression {

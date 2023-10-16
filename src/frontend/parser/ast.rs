@@ -29,6 +29,8 @@ pub struct VariableAssignment {
 pub enum ASTExpressionKind {
     Identifier,
     AssignmentExpression,
+    MemberExpression,
+    CallExpression,
     BinaryExpression,
 
     // literals
@@ -47,15 +49,30 @@ pub struct ASTExpression {
 #[derive(Debug, Clone, PartialEq)]
 pub enum ASTExpressionBody {
     Value(Value),
-    BinaryExpressionBody(BinaryExpressionBody),
+    BinaryExpressionBody(BinaryExpression),
     AssignmentExpressionBody(VariableAssignment),
+    CallExpressionBody(CallExpression),
+    MemberExpressionBody(MemberExpression),
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct BinaryExpressionBody {
+pub struct BinaryExpression {
     pub(crate) left: Box<ASTExpression>,
     pub(crate) operator: Value,
     pub(crate) right: Box<ASTExpression>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CallExpression {
+    pub(crate) arguments: Vec<ASTExpression>,
+    pub(crate) caller: Box<ASTExpression>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct MemberExpression {
+    pub(crate) object: Box<ASTExpression>,
+    pub(crate) property: Box<ASTExpression>,
+    pub(crate) computed: bool,
 }
 
 #[derive(Debug, Clone, PartialEq)]

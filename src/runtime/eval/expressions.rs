@@ -5,7 +5,7 @@ use crate::{
         lexer::lib::{Object, Value},
         parser::ast::{
             ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, ASTStatementKind,
-            BinaryExpressionBody, VariableAssignment,
+            BinaryExpression, VariableAssignment,
         },
     },
     helpers::build_null_runtime_value::build_null_runtime_value,
@@ -23,7 +23,7 @@ pub fn evaluate_identifier_expression(identifier: String, env: &mut Environment)
 }
 
 pub fn evaluate_binary_expression(
-    binary_exp: BinaryExpressionBody,
+    binary_exp: BinaryExpression,
     env: &mut Environment,
 ) -> RuntimeValue {
     let left_hand_side_statement = ASTStatement {

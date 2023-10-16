@@ -12,15 +12,18 @@ pub enum Type {
     Const,
 
     // operators
-    Operator,   // +, -, *, /
-    OpenParen,  // (
-    CloseParen, // )
-    Comma,      // ,
-    Colon,      // :
-    OpenBrace,  // {
-    CloseBrace, // }
-    Semi,       // ;
-    Equals,     // =
+    Operator,     // +, -, *, /
+    OpenParen,    // (
+    CloseParen,   // )
+    Comma,        // ,
+    Colon,        // :
+    OpenBrace,    // {
+    CloseBrace,   // }
+    OpenBracket,  // [
+    CloseBracket, // ]
+    Semi,         // ;
+    Dot,          // .
+    Equals,       // =
 
     // values
     Number,
@@ -88,6 +91,18 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
             }),
             '}' => tokens.push(Token {
                 r#type: Type::CloseBrace,
+                value: Value::String(String::from("]")),
+            }),
+            '.' => tokens.push( Token {
+                r#type: Type::Dot,
+                value: Value::String(String::from(".")),
+            }),
+            '[' => tokens.push(Token {
+                r#type: Type::OpenBracket,
+                value: Value::String(String::from("[")),
+            }),
+            ']' => tokens.push(Token {
+                r#type: Type::CloseBracket,
                 value: Value::String(String::from("]")),
             }),
             '%' => tokens.push(Token {
