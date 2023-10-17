@@ -104,7 +104,10 @@ impl Parser {
 
         match self.advance().r#type {
             Type::Semi => (),
-            _ => panic!("expected \";\" at variable declaration"),
+            _ => panic!(
+                "expected \";\" at variable declaration, found {:?}",
+                self.peek()
+            ),
         };
 
         declaration

@@ -93,7 +93,7 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                 r#type: Type::CloseBrace,
                 value: Value::String(String::from("]")),
             }),
-            '.' => tokens.push( Token {
+            '.' => tokens.push(Token {
                 r#type: Type::Dot,
                 value: Value::String(String::from(".")),
             }),
@@ -213,7 +213,9 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                         Some(next_char) => match next_char {
                             ' ' => break,
                             // operator if operators.contains(&operator) => break,
-                            valid_char if valid_char.is_alphabetic() => {
+                            valid_char
+                                if valid_char.is_ascii() && !operators.contains(&valid_char) =>
+                            {
                                 full_statement.push(next_char);
                                 cursor += 1;
                                 continue;

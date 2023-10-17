@@ -5,7 +5,7 @@ use crate::{
         lexer::lib::{Object, Value},
         parser::ast::{
             ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, ASTStatementKind,
-            BinaryExpression, VariableAssignment,
+            BinaryExpression, CallExpression, VariableAssignment,
         },
     },
     helpers::build_null_runtime_value::build_null_runtime_value,
@@ -154,4 +154,43 @@ pub fn evaluate_object_expression(obj: Object, env: &mut Environment) -> Runtime
     RuntimeValue {
         value_type: ValueType::Object(object),
     }
+}
+
+pub fn evaluate_call_expression(expression: CallExpression, env: &mut Environment) -> RuntimeValue {
+    let args: Vec<RuntimeValue> = expression
+        .arguments
+        .iter()
+        .map(|arg| {
+            let arg_statement = ASTStatement {
+                kind: ASTStatementKind::ExpressionStatement(ASTExpression {
+                    kind: arg.kind.clone(),
+                    body: arg.body.clone(),
+                }),
+            };
+
+            evaluate_statement(arg_statement, env)
+        })
+        .collect();
+
+    let caller_statement = ASTStatement {
+        kind: ASTStatementKind::ExpressionStatement(ASTExpression {
+            kind: expression.caller.kind,
+            body: expression.caller.body,
+        }),
+    };
+
+    let func = evaluate_statement(caller_statement, env);
+
+    if !matches!(func.value_type, ValueType::NativeFunction(_)) {
+        panic!("Cannot call value that is not a function: {:?}", func);
+    }
+
+    let func = match func.value_type {
+        ValueType::NativeFunction(func) => func,
+        _ => panic!("Invalid value type"),
+    };
+
+    let result = (func.call)(args, env.clone());
+
+    result
 }

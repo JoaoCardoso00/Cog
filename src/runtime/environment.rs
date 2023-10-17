@@ -2,16 +2,28 @@ use std::collections::{HashMap, HashSet};
 
 use crate::helpers::{
     build_bool_runtime_value::build_bool_runtime_value,
+    build_native_function::build_native_function,
     build_null_runtime_value::build_null_runtime_value,
 };
 
-use super::values::RuntimeValue;
+use super::{
+    functions::{get_time, print},
+    values::RuntimeValue,
+};
 
 pub fn build_scope(env: &mut Environment) {
     // Global variables
     env.declare_variable("true".to_string(), build_bool_runtime_value(true), true);
     env.declare_variable("false".to_string(), build_bool_runtime_value(false), true);
     env.declare_variable("null".to_string(), build_null_runtime_value(), true);
+
+    // Global functions
+    env.declare_variable("print".to_string(), build_native_function(print), true);
+    env.declare_variable(
+        "get_current_time".to_string(),
+        build_native_function(get_time),
+        true,
+    );
 }
 
 #[derive(Debug, Clone)]
