@@ -1,4 +1,6 @@
-use crate::helpers::build_null_runtime_value::build_null_runtime_value;
+use crate::{
+    helpers::build_null_runtime_value::build_null_runtime_value, runtime::values::BooleanValue,
+};
 
 use super::{
     environment::Environment,
@@ -7,7 +9,28 @@ use super::{
 
 pub fn print(args: Vec<RuntimeValue>, _scope: Environment) -> RuntimeValue {
     for arg in args {
-        print!("{:#?}", arg);
+        let arg_value_type = arg.value_type;
+
+        match arg_value_type {
+            ValueType::Number(value) => {
+                print!("{}", value.value);
+            }
+            ValueType::Boolean(value) => {
+                print!("{}", value.value);
+            }
+            ValueType::String(value) => {
+                print!("{}", value.value);
+            }
+            ValueType::Null(value) => {
+                print!("{}", value.value);
+            }
+            ValueType::Object(value) => {
+                print!("{:#?}", value);
+            }
+            ValueType::NativeFunction(value) => {
+                print!("{:#?}", value);
+            }
+        }
     }
 
     build_null_runtime_value()
