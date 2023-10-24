@@ -42,6 +42,16 @@ impl Parser {
         token
     }
 
+    fn expect(&mut self, expected_type: Type) -> Token {
+        let token = self.advance();
+
+        if token.r#type != expected_type {
+            panic!("expected {:?}, found {:?}", expected_type, token,);
+        }
+
+        token
+    }
+
     pub fn parse(&mut self) -> AST<'static> {
         let mut statements: Vec<ASTStatement> = vec![];
 
@@ -58,10 +68,15 @@ impl Parser {
     fn parse_statement(&mut self) -> ASTStatement {
         match self.peek().r#type {
             Type::Let | Type::Const => self.parse_variable_declaration(),
+            Type::Fn => self.parse_function_declaration(),
             _ => ASTStatement {
                 kind: ASTStatementKind::ExpressionStatement(self.parse_expression()),
             },
         }
+    }
+
+    fn parse_function_declaration(&mut self) -> ASTStatement {
+        todo!()
     }
 
     fn parse_variable_declaration(&mut self) -> ASTStatement {
@@ -146,11 +161,7 @@ impl Parser {
         let mut properties: Vec<Property> = vec![];
 
         while self.not_eof() && self.peek().r#type != Type::CloseBrace {
-            let key = self.advance();
-
-            if key.r#type != Type::Identifier {
-                panic!("expected identifier");
-            }
+            let key = self.expect(Type::Identifier);
 
             let key = match key.value {
                 Value::String(value) => value,
@@ -183,19 +194,11 @@ impl Parser {
             });
 
             if self.peek().r#type != Type::CloseBrace {
-                let comma = self.advance();
-
-                if comma.r#type != Type::Comma {
-                    panic!("expected comma");
-                }
+                self.expect(Type::Comma);
             }
         }
 
-        let closing_brace = self.advance();
-
-        if closing_brace.r#type != Type::CloseBrace {
-            panic!("expected closing brace");
-        }
+        self.expect(Type::CloseBrace);
 
         ASTExpression {
             kind: ASTExpressionKind::ObjectLiteral,
@@ -277,22 +280,14 @@ impl Parser {
     }
 
     fn parse_arguments(&mut self) -> Vec<ASTExpression> {
-        let open_paren = self.advance();
-
-        if open_paren.r#type != Type::OpenParen {
-            panic!("expected opening parenthesis");
-        }
+        self.expect(Type::OpenParen);
 
         let arguments = match self.peek().r#type {
             Type::CloseParen => vec![],
             _ => self.parse_arguments_list(),
         };
 
-        let closing_paren = self.advance();
-
-        if closing_paren.r#type != Type::CloseParen {
-            panic!("missing closing parenthesis");
-        }
+        self.expect(Type::CloseParen);
 
         arguments
     }
@@ -330,11 +325,7 @@ impl Parser {
                     computed = true;
                     property = self.parse_expression();
 
-                    let closing_bracket = self.advance();
-
-                    if closing_bracket.r#type != Type::CloseBracket {
-                        panic!("expected closing bracket");
-                    }
+                    self.expect(Type::CloseBracket);
                 }
             }
 
@@ -361,11 +352,7 @@ impl Parser {
             },
             Type::OpenParen => {
                 let value = self.parse_expression();
-                let closing_paren = self.advance();
-
-                if closing_paren.r#type != Type::CloseParen {
-                    panic!("expected closing parenthesis");
-                }
+                self.expect(Type::CloseParen);
 
                 value
             }

@@ -10,6 +10,7 @@ pub struct AST<'a> {
 pub enum ASTStatementKind {
     ExpressionStatement(ASTExpression),
     VariableDeclaration(VariableDeclaration),
+    FunctionDeclaration(FunctionDeclaration),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -17,6 +18,13 @@ pub struct VariableDeclaration {
     pub(crate) constant: bool,
     pub(crate) identifier: Value,
     pub(crate) value: Option<ASTExpression>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct FunctionDeclaration {
+    pub(crate) identifier: Value,
+    pub(crate) parameters: Vec<Value>,
+    pub(crate) body: Box<ASTStatement>,
 }
 
 #[derive(Debug, Clone, PartialEq)]

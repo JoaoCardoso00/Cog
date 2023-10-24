@@ -10,6 +10,7 @@ pub enum Type {
     // variable declaration
     Let,
     Const,
+    Fn,
     For,
     In,
     If,
@@ -270,6 +271,10 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                     "else" => tokens.push(Token {
                         r#type: Type::Else,
                         value: Value::String(String::from("else")),
+                    }),
+                    "fn" => tokens.push(Token {
+                        r#type: Type::Fn,
+                        value: Value::String(String::from("fn")),
                     }),
                     "while" => tokens.push(Token {
                         r#type: Type::While,
