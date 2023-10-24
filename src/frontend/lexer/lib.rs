@@ -10,9 +10,15 @@ pub enum Type {
     // variable declaration
     Let,
     Const,
+    For,
+    In,
+    If,
+    Else,
+    While,
 
     // operators
     Operator,     // +, -, *, /
+    Interval,     // ..
     OpenParen,    // (
     CloseParen,   // )
     Comma,        // ,
@@ -93,10 +99,23 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                 r#type: Type::CloseBrace,
                 value: Value::String(String::from("]")),
             }),
-            '.' => tokens.push(Token {
-                r#type: Type::Dot,
-                value: Value::String(String::from(".")),
-            }),
+            '.' => {
+                let next_char = input.chars().nth(cursor + 1);
+
+                if next_char == Some('.') {
+                    tokens.push(Token {
+                        r#type: Type::Interval,
+                        value: Value::String(String::from("..")),
+                    });
+
+                    cursor += 1;
+                } else {
+                    tokens.push(Token {
+                        r#type: Type::Dot,
+                        value: Value::String(String::from(".")),
+                    });
+                }
+            }
             '[' => tokens.push(Token {
                 r#type: Type::OpenBracket,
                 value: Value::String(String::from("[")),
@@ -235,6 +254,26 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                     "const" => tokens.push(Token {
                         r#type: Type::Const,
                         value: Value::String(String::from("const")),
+                    }),
+                    "for" => tokens.push(Token {
+                        r#type: Type::For,
+                        value: Value::String(String::from("for")),
+                    }),
+                    "in" => tokens.push(Token {
+                        r#type: Type::In,
+                        value: Value::String(String::from("in")),
+                    }),
+                    "if" => tokens.push(Token {
+                        r#type: Type::If,
+                        value: Value::String(String::from("if")),
+                    }),
+                    "else" => tokens.push(Token {
+                        r#type: Type::Else,
+                        value: Value::String(String::from("else")),
+                    }),
+                    "while" => tokens.push(Token {
+                        r#type: Type::While,
+                        value: Value::String(String::from("while")),
                     }),
                     _ => tokens.push(Token {
                         r#type: Type::Identifier,
