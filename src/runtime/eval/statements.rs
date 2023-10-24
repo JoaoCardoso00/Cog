@@ -13,7 +13,7 @@ use crate::{
     helpers::build_null_runtime_value::build_null_runtime_value,
     runtime::{
         environment::Environment,
-        values::{NumberValue, RuntimeValue, ValueType, ValueTypes},
+        values::{NumberValue, RuntimeValue, StringValue, ValueType, ValueTypes},
     },
 };
 
@@ -35,6 +35,15 @@ pub fn evaluate_statement(ast_node: ASTStatement, env: &mut Environment) -> Runt
                     r#type: ValueTypes::Number,
                     value: match expression.body {
                         ASTExpressionBody::Value(Value::Number(value)) => value,
+                        _ => panic!("Invalid value type"),
+                    },
+                }),
+            },
+            ASTExpressionKind::StringLiteral => RuntimeValue {
+                value_type: ValueType::String(StringValue {
+                    r#type: ValueTypes::String,
+                    value: match expression.body {
+                        ASTExpressionBody::Value(Value::String(value)) => value,
                         _ => panic!("Invalid value type"),
                     },
                 }),

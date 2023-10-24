@@ -22,6 +22,7 @@ pub fn evaluate_identifier_expression(identifier: String, env: &mut Environment)
     val
 }
 
+
 pub fn evaluate_binary_expression(
     binary_exp: BinaryExpression,
     env: &mut Environment,

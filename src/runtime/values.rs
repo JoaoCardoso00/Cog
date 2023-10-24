@@ -8,6 +8,7 @@ pub(crate) enum ValueType {
     Number(NumberValue),
     Boolean(BooleanValue),
     Object(ObjectValue),
+    String(StringValue),
     NativeFunction(NativeFunctionValue),
 }
 
@@ -17,7 +18,8 @@ pub enum ValueTypes {
     Number,
     Boolean,
     Object,
-    Function, // String,
+    Function,
+    String
 }
 
 #[derive(Debug, Clone)]
@@ -47,6 +49,12 @@ pub struct NumberValue {
 pub struct BooleanValue {
     pub(crate) r#type: ValueTypes,
     pub(crate) value: bool,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct StringValue {
+    pub(crate) r#type: ValueTypes,
+    pub(crate) value: String,
 }
 
 #[derive(Debug, Clone)]
