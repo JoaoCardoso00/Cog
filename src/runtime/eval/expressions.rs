@@ -15,34 +15,22 @@ use crate::{
     },
 };
 
-use super::statements::evaluate_statement;
+use super::statements::{evaluate_expression, evaluate_statement};
 
 pub fn evaluate_identifier_expression(identifier: String, env: &mut Environment) -> RuntimeValue {
     let val = env.peek_variable(identifier);
     val
 }
 
-
 pub fn evaluate_binary_expression(
     binary_exp: BinaryExpression,
     env: &mut Environment,
 ) -> RuntimeValue {
-    let left_hand_side_statement = ASTStatement {
-        kind: ASTStatementKind::ExpressionStatement(ASTExpression {
-            kind: binary_exp.left.kind,
-            body: binary_exp.left.body,
-        }),
-    };
+    let left_hand_side = binary_exp.left;
+    let right_hand_side = binary_exp.right;
 
-    let right_hand_side_statement = ASTStatement {
-        kind: ASTStatementKind::ExpressionStatement(ASTExpression {
-            kind: binary_exp.right.kind,
-            body: binary_exp.right.body,
-        }),
-    };
-
-    let left_hand_side = evaluate_statement(left_hand_side_statement, env);
-    let right_hand_side = evaluate_statement(right_hand_side_statement, env);
+    let left_hand_side = evaluate_expression(*left_hand_side, env);
+    let right_hand_side = evaluate_expression(*right_hand_side, env);
 
     if matches!(left_hand_side.value_type, ValueType::Number(_))
         && matches!(right_hand_side.value_type, ValueType::Number(_))
@@ -114,14 +102,7 @@ pub fn evaluate_assignment_expression(
         _ => panic!("Invalid value type"),
     };
 
-    let value_statement = ASTStatement {
-        kind: ASTStatementKind::ExpressionStatement(ASTExpression {
-            kind: node.value.kind,
-            body: node.value.body,
-        }),
-    };
-
-    let value_to_assign = evaluate_statement(value_statement, env);
+    let value_to_assign = evaluate_expression(*node.value, env);
     env.assign_variable(variable_name, value_to_assign)
 }
 
