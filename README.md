@@ -10,8 +10,8 @@ Cog has support for the following:
 - [x] variable declaration
 - [x] native function calls
 - [x] objects and object member calls
+- [x] string literals
 - [ ] user defined functions
-- [ ] string literals
 - [ ] conditionals
 - [ ] loops
 
