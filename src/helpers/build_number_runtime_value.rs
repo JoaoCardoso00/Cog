@@ -8,3 +8,4 @@ pub fn build_number_runtime_value(number: f64) -> RuntimeValue {
         }),
     }
 }
+

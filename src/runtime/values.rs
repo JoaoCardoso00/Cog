@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use crate::frontend::parser::ast::ASTStatement;
+
 use super::environment::Environment;
 
 #[derive(Debug, Clone)]
@@ -10,6 +12,7 @@ pub(crate) enum ValueType {
     Object(ObjectValue),
     String(StringValue),
     NativeFunction(NativeFunctionValue),
+    Function(FunctionValue),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -19,7 +22,7 @@ pub enum ValueTypes {
     Boolean,
     Object,
     Function,
-    String
+    String,
 }
 
 #[derive(Debug, Clone)]
@@ -37,6 +40,14 @@ pub struct NullValue {
 pub struct NativeFunctionValue {
     pub(crate) r#type: ValueTypes,
     pub(crate) call: fn(Vec<RuntimeValue>, env: Environment) -> RuntimeValue,
+}
+
+#[derive(Debug, Clone)]
+pub struct FunctionValue {
+    pub(crate) r#type: ValueTypes,
+    pub(crate) name: String,
+    pub(crate) body: Vec<ASTStatement>,
+    pub(crate) parameters: Vec<String>,
 }
 
 #[derive(Debug, PartialEq, Clone)]

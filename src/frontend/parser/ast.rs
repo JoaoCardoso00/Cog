@@ -22,9 +22,9 @@ pub struct VariableDeclaration {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct FunctionDeclaration {
-    pub(crate) identifier: Value,
-    pub(crate) parameters: Vec<Value>,
-    pub(crate) body: Box<ASTStatement>,
+    pub(crate) identifier: String,
+    pub(crate) parameters: Vec<String>,
+    pub(crate) body: Vec<ASTStatement>,
 }
 
 #[derive(Debug, Clone, PartialEq)]

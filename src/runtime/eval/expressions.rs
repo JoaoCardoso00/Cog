@@ -1,3 +1,4 @@
+use core::panic;
 use std::collections::HashMap;
 
 use crate::{
@@ -163,16 +164,35 @@ pub fn evaluate_call_expression(expression: CallExpression, env: &mut Environmen
 
     let func = evaluate_statement(caller_statement, env);
 
-    if !matches!(func.value_type, ValueType::NativeFunction(_)) {
-        panic!("Cannot call value that is not a function: {:?}", func);
+    if matches!(func.value_type, ValueType::NativeFunction(_)) {
+        let func = match func.value_type {
+            ValueType::NativeFunction(func) => func,
+            _ => panic!("Invalid value type"),
+        };
+        let result = (func.call)(args, env.clone());
+
+        return result;
     }
 
-    let func = match func.value_type {
-        ValueType::NativeFunction(func) => func,
-        _ => panic!("Invalid value type"),
-    };
+    if matches!(func.value_type, ValueType::Function(_)) {
+        let func = match func.value_type {
+            ValueType::Function(func) => func,
+            _ => panic!("Invalid value type"),
+        };
 
-    let result = (func.call)(args, env.clone());
+        for (index, parameter) in func.parameters.iter().enumerate() {
+            let arg = args.get(index).unwrap();
+            env.declare_variable(parameter.clone(), arg.clone(), false);
+        }
 
-    result
+        let mut result: RuntimeValue = build_null_runtime_value();
+
+        for statement in func.body {
+            result = evaluate_statement(statement, env)
+        }
+
+        return result;
+    }
+
+    panic!("Invalid function type");
 }

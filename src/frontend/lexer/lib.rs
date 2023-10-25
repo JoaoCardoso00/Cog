@@ -163,6 +163,7 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                         break;
                     }
 
+
                     match next_char.unwrap() {
                         valid_char if valid_char.is_digit(10) => {
                             full_number.push(next_char.unwrap());

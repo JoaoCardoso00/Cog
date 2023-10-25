@@ -7,13 +7,13 @@ use crate::{
         lexer::lib::Value,
         parser::ast::{
             ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, ASTStatementKind,
-            VariableDeclaration, AST,
+            FunctionDeclaration, VariableDeclaration, AST,
         },
     },
     helpers::build_null_runtime_value::build_null_runtime_value,
     runtime::{
         environment::Environment,
-        values::{NumberValue, RuntimeValue, StringValue, ValueType, ValueTypes},
+        values::{FunctionValue, NumberValue, RuntimeValue, StringValue, ValueType, ValueTypes},
     },
 };
 
@@ -32,6 +32,9 @@ pub fn evaluate_statement(ast_node: ASTStatement, env: &mut Environment) -> Runt
         ASTStatementKind::ExpressionStatement(expression) => evaluate_expression(expression, env),
         ASTStatementKind::VariableDeclaration(variable_declaration) => {
             evaluate_variable_declaration(variable_declaration, env)
+        }
+        ASTStatementKind::FunctionDeclaration(function_declaration) => {
+            evaluate_function_declaration(function_declaration, env)
         }
         _ => panic!("This statement type is not supported yet: {:?}", ast_node),
     }
@@ -123,4 +126,21 @@ pub fn evaluate_variable_declaration(
         variable_value,
         variable_declaration_statement.constant,
     )
+}
+
+pub fn evaluate_function_declaration(
+    function_declaration: FunctionDeclaration,
+    env: &mut Environment,
+) -> RuntimeValue {
+    // this should recieve a scope, but i don't know how to do it yet because lifetimes are a pain in the ass, so we can just have global scope for everything :)
+    let func = RuntimeValue {
+        value_type: ValueType::Function(FunctionValue {
+            r#type: ValueTypes::Function,
+            name: function_declaration.identifier.clone(),
+            parameters: function_declaration.parameters,
+            body: function_declaration.body,
+        }),
+    };
+
+    env.declare_variable(function_declaration.identifier, func, false)
 }

@@ -1,4 +1,4 @@
-use crate::runtime::values::{NullValue, RuntimeValue, ValueType, ValueTypes};
+use crate::runtime::{values::{NullValue, RuntimeValue, ValueType, ValueTypes}};
 
 pub fn build_null_runtime_value() -> RuntimeValue {
     RuntimeValue {
@@ -8,3 +8,4 @@ pub fn build_null_runtime_value() -> RuntimeValue {
         }),
     }
 }
+

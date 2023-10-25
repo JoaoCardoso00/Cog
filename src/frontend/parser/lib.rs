@@ -1,5 +1,3 @@
-use core::panic;
-
 use crate::{
     frontend::lexer::lib::{Token, Type, Value},
     frontend::{
@@ -12,7 +10,8 @@ use crate::{
 };
 
 use super::ast::{
-    ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, ASTStatementKind, AST,
+    ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, ASTStatementKind,
+    FunctionDeclaration, AST,
 };
 
 pub struct Parser {
@@ -76,7 +75,47 @@ impl Parser {
     }
 
     fn parse_function_declaration(&mut self) -> ASTStatement {
-        todo!()
+        self.advance(); // consume "fn"
+
+        let identifier = match self.expect(Type::Identifier).value {
+            Value::String(value) => value,
+            _ => panic!("expected identifier"),
+        };
+
+        let args = self.parse_arguments();
+
+        let mut parameters: Vec<String> = vec![];
+
+        for arg in args {
+            if arg.kind != ASTExpressionKind::Identifier {
+                panic!("expected identifier");
+            }
+
+            let arg_value = match arg.body {
+                ASTExpressionBody::Value(Value::String(value)) => value,
+                _ => panic!("expected identifier"),
+            };
+
+            parameters.push(arg_value);
+        }
+
+        self.expect(Type::OpenBrace);
+
+        let mut body: Vec<ASTStatement> = vec![];
+
+        while self.peek().r#type != Type::EOF && self.peek().r#type != Type::CloseBrace {
+            body.push(self.parse_statement());
+        }
+
+        self.expect(Type::CloseBrace);
+
+        ASTStatement {
+            kind: ASTStatementKind::FunctionDeclaration(FunctionDeclaration {
+                parameters,
+                identifier,
+                body,
+            }),
+        }
     }
 
     fn parse_variable_declaration(&mut self) -> ASTStatement {

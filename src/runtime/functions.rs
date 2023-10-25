@@ -30,6 +30,9 @@ pub fn print(args: Vec<RuntimeValue>, _scope: Environment) -> RuntimeValue {
             ValueType::NativeFunction(value) => {
                 print!("{:#?}", value);
             }
+            ValueType::Function(value) => {
+                print!("{:#?}", value);
+            }
         }
     }
 

@@ -1,3 +1,5 @@
-let x = 5;
+fn makeAdder(offset) {
+    print(offset)
+}
 
-print(x)
+makeAdder(10)
