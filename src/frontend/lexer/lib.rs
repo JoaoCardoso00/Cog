@@ -65,7 +65,20 @@ pub struct Token {
 pub fn tokenize(input: &String) -> Result<Vec<Token>> {
     const NEW_LINE_CHARACTER: char = 0xA as char;
     let operators = vec![
-        '+', '-', '*', '/', '%', ':', '=', '(', ')', '{', '}', ';', ',',
+        '+',
+        '-',
+        '*',
+        '/',
+        '%',
+        ':',
+        '=',
+        '(',
+        ')',
+        '{',
+        '}',
+        ';',
+        ',',
+        NEW_LINE_CHARACTER,
     ];
     let mut tokens: Vec<Token> = vec![];
     let mut cursor: usize = 0;
@@ -94,11 +107,11 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
             }),
             '{' => tokens.push(Token {
                 r#type: Type::OpenBrace,
-                value: Value::String(String::from("[")),
+                value: Value::String(String::from("{")),
             }),
             '}' => tokens.push(Token {
                 r#type: Type::CloseBrace,
-                value: Value::String(String::from("]")),
+                value: Value::String(String::from("}")),
             }),
             '.' => {
                 let next_char = input.chars().nth(cursor + 1);
@@ -163,7 +176,6 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                         break;
                     }
 
-
                     match next_char.unwrap() {
                         valid_char if valid_char.is_digit(10) => {
                             full_number.push(next_char.unwrap());
@@ -197,6 +209,7 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                     match next_char {
                         Some(next_char) => match next_char {
                             ' ' => break,
+                            '\\' => break,
                             valid_char if valid_char.is_ascii() => {
                                 full_statement.push(next_char);
                                 cursor += 1;
@@ -233,7 +246,7 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                     match next_char {
                         Some(next_char) => match next_char {
                             ' ' => break,
-                            // operator if operators.contains(&operator) => break,
+                            operator if operators.contains(&operator) => break,
                             valid_char
                                 if valid_char.is_ascii() && !operators.contains(&valid_char) =>
                             {

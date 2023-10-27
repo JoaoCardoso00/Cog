@@ -1,4 +1,4 @@
-use std::{cell::RefCell, io::Write, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use super::expressions::{
     evaluate_assignment_expression, evaluate_binary_expression, evaluate_call_expression,
@@ -12,7 +12,10 @@ use crate::{
             FunctionDeclaration, VariableDeclaration, AST,
         },
     },
-    helpers::build_null_runtime_value::build_null_runtime_value,
+    helpers::{
+        build_null_runtime_value::build_null_runtime_value,
+        build_number_runtime_value::build_number_runtime_value,
+    },
     runtime::{
         environment::{Environment, ScopeType},
         values::{FunctionValue, NumberValue, RuntimeValue, StringValue, ValueType, ValueTypes},
@@ -134,21 +137,31 @@ pub fn evaluate_function_declaration(
     function_declaration: FunctionDeclaration,
     env: &mut Environment,
 ) -> RuntimeValue {
-    // Step 1: Declare a placeholder function in the environment
-    let placeholder = build_null_runtime_value(); // or some other placeholder value
-    env.declare_variable(function_declaration.identifier.clone(), placeholder, false);
+    // Create a new local environment that extends the current environment
+    let local_env = Rc::new(RefCell::new(Environment::new(Some(ScopeType::Local(
+        Rc::new(RefCell::new(env.clone())),
+    )))));
 
-    // Step 2: Construct the actual function and update the placeholder
+    // Construct the function with the local environment as its scope
     let func = RuntimeValue {
         value_type: ValueType::Function(FunctionValue {
             r#type: ValueTypes::Function,
             name: function_declaration.identifier.clone(),
             parameters: function_declaration.parameters,
             body: function_declaration.body,
-            scope: Rc::new(RefCell::new(env.clone())),
+            scope: Rc::clone(&local_env),
         }),
     };
 
-    env.assign_variable(function_declaration.identifier, func.clone());
+    // Declare the function in the new local environment
+    local_env.borrow_mut().declare_variable(
+        function_declaration.identifier.clone(),
+        func.clone(),
+        false,
+    );
+
+    // Also declare the function in the original environment so it's accessible outside
+    env.declare_variable(function_declaration.identifier, func.clone(), false);
+
     func
 }

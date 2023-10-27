@@ -1,5 +1,5 @@
 use core::panic;
-use std::collections::HashMap;
+use std::{cell::RefCell, collections::HashMap, io::Write, rc::Rc};
 
 use crate::{
     frontend::{
@@ -139,64 +139,36 @@ pub fn evaluate_object_expression(obj: Object, env: &mut Environment) -> Runtime
     }
 }
 
-pub fn evaluate_call_expression(expression: CallExpression, env: &mut Environment) -> RuntimeValue {
-    let args: Vec<RuntimeValue> = expression
-        .arguments
-        .iter()
-        .map(|arg| {
-            let arg_statement = ASTStatement {
-                kind: ASTStatementKind::ExpressionStatement(ASTExpression {
-                    kind: arg.kind.clone(),
-                    body: arg.body.clone(),
-                }),
-            };
+pub fn evaluate_call_expression(
+    call_expression: CallExpression,
+    env: &mut Environment,
+) -> RuntimeValue {
+    let caller = evaluate_expression(*call_expression.caller, env);
+    let mut arguments = Vec::new();
 
-            evaluate_statement(arg_statement, env)
-        })
-        .collect();
-
-    let caller_statement = ASTStatement {
-        kind: ASTStatementKind::ExpressionStatement(ASTExpression {
-            kind: expression.caller.kind,
-            body: expression.caller.body,
-        }),
-    };
-
-    let func = evaluate_statement(caller_statement, env);
-
-    if matches!(func.value_type, ValueType::NativeFunction(_)) {
-        let func = match func.value_type {
-            ValueType::NativeFunction(func) => func,
-            _ => panic!("Invalid value type"),
-        };
-        let result = (func.call)(args, env.clone());
-
-        return result;
+    for arg in call_expression.arguments {
+        arguments.push(evaluate_expression(arg, env));
     }
 
-    if matches!(func.value_type, ValueType::Function(_)) {
-        let func = match func.value_type {
-            ValueType::Function(func) => func,
-            _ => panic!("Invalid value type"),
-        };
-
-        let mut scope = Environment::new(Some(ScopeType::Local(func.scope)));
-
-        for (index, parameter) in func.parameters.iter().enumerate() {
-            let arg = args.get(index).unwrap();
-            scope.declare_variable(parameter.clone(), arg.clone(), false);
+    match caller.value_type {
+        ValueType::NativeFunction(native_function) => {
+            (native_function.call)(arguments, env.clone())
         }
+        ValueType::Function(func) => {
+            let mut function_scope = Environment::new(Some(ScopeType::Local(func.scope)));
 
-        let mut result: RuntimeValue = build_null_runtime_value();
+            for (index, parameter) in func.parameters.iter().enumerate() {
+                function_scope.declare_variable(parameter.clone(), arguments[index].clone(), false);
+            }
 
-        for statement in func.body {
-            result = evaluate_statement(statement, env)
+            let mut result: RuntimeValue = build_null_runtime_value();
+
+            for statement in func.body {
+                result = evaluate_statement(statement, &mut function_scope);
+            }
+
+            result
         }
-
-        return result;
+        _ => panic!("Trying to call a non-function value"),
     }
-
-    println!("{:?}", func.value_type);
-
-    panic!("Invalid function type");
 }
