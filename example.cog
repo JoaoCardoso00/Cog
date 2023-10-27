@@ -1,5 +1,3 @@
-fn makeAdder(offset) {
-    print(offset)
+if x {
+  print (x)
 }
-
-makeAdder(10)

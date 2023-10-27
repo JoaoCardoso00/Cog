@@ -142,5 +142,7 @@ pub fn evaluate_function_declaration(
         }),
     };
 
-    env.declare_variable(function_declaration.identifier, func, false)
+    let result = env.declare_variable(function_declaration.identifier, func, false);
+
+    result
 }

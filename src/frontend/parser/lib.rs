@@ -67,11 +67,22 @@ impl Parser {
     fn parse_statement(&mut self) -> ASTStatement {
         match self.peek().r#type {
             Type::Let | Type::Const => self.parse_variable_declaration(),
+            Type::For | Type::While => self.parse_loop_statement(),
             Type::Fn => self.parse_function_declaration(),
+            Type::If => self.parse_conditional_statement(),
             _ => ASTStatement {
                 kind: ASTStatementKind::ExpressionStatement(self.parse_expression()),
             },
         }
+    }
+
+    //TODO: implement conditional and loop statements for parser
+    fn parse_conditional_statement(&mut self) -> ASTStatement {
+        todo!()
+    }
+
+    fn parse_loop_statement(&mut self) -> ASTStatement {
+        todo!()
     }
 
     fn parse_function_declaration(&mut self) -> ASTStatement {

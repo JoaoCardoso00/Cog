@@ -11,6 +11,24 @@ pub enum ASTStatementKind {
     ExpressionStatement(ASTExpression),
     VariableDeclaration(VariableDeclaration),
     FunctionDeclaration(FunctionDeclaration),
+    ConditionalStatement(ConditionalStatement),
+    LoopStatement(LoopStatement),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LoopStatement {
+    pub(crate) body: Vec<ASTStatement>,
+    pub(crate) identifier: String,
+    pub(crate) start: f64,
+    pub(crate) end: f64,
+    pub(crate) condition: Option<ASTExpression>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ConditionalStatement {
+    pub(crate) condition: ASTExpression,
+    pub(crate) consequent: Vec<ASTStatement>,
+    pub(crate) alternate: Option<Vec<ASTStatement>>,
 }
 
 #[derive(Debug, Clone, PartialEq)]

@@ -1,6 +1,4 @@
-use crate::{
-    helpers::build_null_runtime_value::build_null_runtime_value
-};
+use crate::helpers::build_null_runtime_value::build_null_runtime_value;
 
 use super::{
     environment::Environment,
