@@ -14,7 +14,8 @@ Cog has support for the following:
 - [x] user defined functions
 - [ ] conditionals
 - [ ] loops
-``
+
+
 Since this is a college project i dont think i will add anything outside the list mentioned above, this is a side project, feel free to use the contents in this repo as you wish.
 
 ## Runing the project:
