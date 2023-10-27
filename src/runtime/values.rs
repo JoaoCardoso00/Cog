@@ -42,12 +42,14 @@ pub struct NativeFunctionValue {
     pub(crate) call: fn(Vec<RuntimeValue>, env: Environment) -> RuntimeValue,
 }
 
-#[derive(Debug, Clone)]
+//TODO: find a way to make this work without breaking everything
+#[derive(Debug)]
 pub struct FunctionValue {
     pub(crate) r#type: ValueTypes,
     pub(crate) name: String,
     pub(crate) body: Vec<ASTStatement>,
     pub(crate) parameters: Vec<String>,
+    pub(crate) scope: &mut Environment,
 }
 
 #[derive(Debug, PartialEq, Clone)]

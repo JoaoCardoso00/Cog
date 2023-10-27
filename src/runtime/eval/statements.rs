@@ -139,6 +139,8 @@ pub fn evaluate_function_declaration(
             name: function_declaration.identifier.clone(),
             parameters: function_declaration.parameters,
             body: function_declaration.body,
+            //TODO: fix issue with env implementation
+            scope: env,
         }),
     };
 
