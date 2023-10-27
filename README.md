@@ -11,7 +11,7 @@ Cog has support for the following:
 - [x] native function calls
 - [x] objects and object member calls
 - [x] string literals
-- [ ] user defined functions
+- [x] user defined functions
 - [ ] conditionals
 - [ ] loops
 ``
