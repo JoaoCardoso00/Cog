@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use super::expressions::{
     evaluate_assignment_expression, evaluate_binary_expression, evaluate_call_expression,
     evaluate_identifier_expression, evaluate_object_expression,
@@ -139,8 +141,7 @@ pub fn evaluate_function_declaration(
             name: function_declaration.identifier.clone(),
             parameters: function_declaration.parameters,
             body: function_declaration.body,
-            //TODO: fix issue with env implementation
-            scope: env,
+            scope: Rc::new(RefCell::new(env.clone())),
         }),
     };
 

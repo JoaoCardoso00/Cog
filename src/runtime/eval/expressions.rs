@@ -11,7 +11,7 @@ use crate::{
     },
     helpers::build_null_runtime_value::build_null_runtime_value,
     runtime::{
-        environment::Environment,
+        environment::{Environment, ScopeType},
         values::{NumberValue, ObjectValue, RuntimeValue, ValueType, ValueTypes},
     },
 };
@@ -180,15 +180,17 @@ pub fn evaluate_call_expression(expression: CallExpression, env: &mut Environmen
             _ => panic!("Invalid value type"),
         };
 
+        let mut scope = Environment::new(Some(ScopeType::Local(func.scope)));
+
         for (index, parameter) in func.parameters.iter().enumerate() {
             let arg = args.get(index).unwrap();
-            env.declare_variable(parameter.clone(), arg.clone(), false);
+            scope.declare_variable(parameter.clone(), arg.clone(), false);
         }
 
         let mut result: RuntimeValue = build_null_runtime_value();
 
         for statement in func.body {
-            result = evaluate_statement(statement, env)
+            result = evaluate_statement(statement, &mut scope)
         }
 
         return result;

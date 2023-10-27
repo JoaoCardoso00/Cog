@@ -1,4 +1,8 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
 use crate::helpers::{
     build_bool_runtime_value::build_bool_runtime_value,
@@ -28,13 +32,19 @@ pub fn build_scope(env: &mut Environment) {
 
 #[derive(Debug, Clone)]
 pub struct Environment {
-    pub parent: Option<Box<Environment>>,
+    pub parent: Option<Box<ScopeType>>,
     pub variables: HashMap<String, RuntimeValue>,
     pub constants: HashSet<String>,
 }
 
+#[derive(Debug, Clone)]
+pub enum ScopeType {
+    Global(Environment),
+    Local(Rc<RefCell<Environment>>),
+}
+
 impl Environment {
-    pub fn new(parent: Option<Environment>) -> Self {
+    pub fn new(parent: Option<ScopeType>) -> Self {
         let is_global = match &parent {
             Some(_) => false,
             None => true,
@@ -97,8 +107,11 @@ impl Environment {
             return self.clone();
         }
 
-        match self.parent {
-            Some(ref parent) => parent.resolve(variable_name),
+        match &self.parent {
+            Some(parent) => match parent.as_ref() {
+                ScopeType::Global(parent) => parent.resolve(variable_name),
+                ScopeType::Local(parent) => parent.borrow().resolve(variable_name),
+            },
             None => panic!("Variable {} not found", variable_name),
         };
 

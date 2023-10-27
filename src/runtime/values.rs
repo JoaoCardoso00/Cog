@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::frontend::parser::ast::ASTStatement;
 
@@ -43,13 +43,13 @@ pub struct NativeFunctionValue {
 }
 
 //TODO: find a way to make this work without breaking everything
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FunctionValue {
     pub(crate) r#type: ValueTypes,
     pub(crate) name: String,
     pub(crate) body: Vec<ASTStatement>,
     pub(crate) parameters: Vec<String>,
-    pub(crate) scope: &mut Environment,
+    pub(crate) scope: Rc<RefCell<Environment>>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
