@@ -190,11 +190,13 @@ pub fn evaluate_call_expression(expression: CallExpression, env: &mut Environmen
         let mut result: RuntimeValue = build_null_runtime_value();
 
         for statement in func.body {
-            result = evaluate_statement(statement, &mut scope)
+            result = evaluate_statement(statement, env)
         }
 
         return result;
     }
+
+    println!("{:?}", func.value_type);
 
     panic!("Invalid function type");
 }

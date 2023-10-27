@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, io::Write, rc::Rc};
 
 use super::expressions::{
     evaluate_assignment_expression, evaluate_binary_expression, evaluate_call_expression,
@@ -14,7 +14,7 @@ use crate::{
     },
     helpers::build_null_runtime_value::build_null_runtime_value,
     runtime::{
-        environment::Environment,
+        environment::{Environment, ScopeType},
         values::{FunctionValue, NumberValue, RuntimeValue, StringValue, ValueType, ValueTypes},
     },
 };
@@ -134,7 +134,11 @@ pub fn evaluate_function_declaration(
     function_declaration: FunctionDeclaration,
     env: &mut Environment,
 ) -> RuntimeValue {
-    // this should recieve a scope, but i don't know how to do it yet because lifetimes are a pain in the ass, so we can just have global scope for everything :)
+    // Step 1: Declare a placeholder function in the environment
+    let placeholder = build_null_runtime_value(); // or some other placeholder value
+    env.declare_variable(function_declaration.identifier.clone(), placeholder, false);
+
+    // Step 2: Construct the actual function and update the placeholder
     let func = RuntimeValue {
         value_type: ValueType::Function(FunctionValue {
             r#type: ValueTypes::Function,
@@ -145,7 +149,6 @@ pub fn evaluate_function_declaration(
         }),
     };
 
-    let result = env.declare_variable(function_declaration.identifier, func, false);
-
-    result
+    env.assign_variable(function_declaration.identifier, func.clone());
+    func
 }
