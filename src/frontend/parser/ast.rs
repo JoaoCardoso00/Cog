@@ -26,7 +26,7 @@ pub struct LoopStatement {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConditionalStatement {
-    pub(crate) condition: ASTExpression,
+    pub(crate) condition: Option<ASTExpression>,
     pub(crate) consequence: Vec<ASTStatement>,
     pub(crate) alternate: Option<Box<ASTStatement>>,
 }

@@ -76,11 +76,10 @@ impl Parser {
         }
     }
 
-    //TODO: implement conditional and loop statements for parser
     fn parse_conditional_statement(&mut self) -> ASTStatement {
-        self.advance(); // consume "if"
+        self.advance();
 
-        let condition = self.parse_expression();
+        let condition = Some(self.parse_expression());
 
         self.expect(Type::OpenBrace);
 
@@ -92,13 +91,25 @@ impl Parser {
 
         self.expect(Type::CloseBrace);
 
-        let mut alternate: Option<Box<ASTStatement>> = None;
+        let mut last_statement = ASTStatement {
+            kind: ASTStatementKind::ConditionalStatement(ConditionalStatement {
+                condition,
+                consequence: body,
+                alternate: None,
+            }),
+        };
 
-        if self.peek().r#type == Type::Else {
-            self.advance(); // consume "else"
+        while self.peek().r#type == Type::Else {
+            self.advance();
 
             if self.peek().r#type == Type::If {
-                alternate = Some(Box::new(self.parse_conditional_statement()));
+                let next_statement = self.parse_conditional_statement();
+
+                last_statement.kind =
+                    ASTStatementKind::ConditionalStatement(ConditionalStatement {
+                        alternate: Some(Box::new(next_statement)),
+                        ..last_statement.kind.extract_conditional().unwrap().clone()
+                    });
             } else {
                 self.expect(Type::OpenBrace);
 
@@ -110,19 +121,24 @@ impl Parser {
 
                 self.expect(Type::CloseBrace);
 
-                alternate = Some(Box::new(ASTStatement {
-                    kind: ASTStatementKind::Block(alternate_body),
-                }));
+                let else_statement = ASTStatement {
+                    kind: ASTStatementKind::ConditionalStatement(ConditionalStatement {
+                        condition: None, // Represents an 'else' block
+                        consequence: alternate_body,
+                        alternate: None,
+                    }),
+                };
+
+                last_statement.kind =
+                    ASTStatementKind::ConditionalStatement(ConditionalStatement {
+                        alternate: Some(Box::new(else_statement)),
+                        ..last_statement.kind.extract_conditional().unwrap().clone()
+                    });
+                break;
             }
         }
 
-        return ASTStatement {
-            kind: ASTStatementKind::ConditionalStatement(ConditionalStatement {
-                condition,
-                consequence: body,
-                alternate,
-            }),
-        };
+        last_statement
     }
 
     fn parse_loop_statement(&mut self) -> ASTStatement {
