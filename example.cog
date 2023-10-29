@@ -1,9 +1,3 @@
-fn add (x, y) {
- let result = x + y;
-
- result
-}
-
-const result = add(10, 4);
-
-print(result)
+if x {
+    print("hello");
+} 

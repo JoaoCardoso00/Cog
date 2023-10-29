@@ -8,9 +8,14 @@ use runtime::environment::Environment;
 use runtime::interpreter::lib::evaluate;
 
 fn main() {
-    let (file_contents, should_print_ast) = read_file_contents_from_args();
+    let (file_contents, should_print_ast, should_print_tokens) = read_file_contents_from_args();
     let mut parser = Parser::new(file_contents);
     let env = Environment::new(None);
+
+    if should_print_tokens {
+        println!("{:#?}", parser.tokens);
+        return;
+    }
 
     let ast = parser.parse();
 
@@ -21,4 +26,3 @@ fn main() {
 
     evaluate(ast, env);
 }
-

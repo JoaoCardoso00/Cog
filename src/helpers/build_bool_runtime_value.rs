@@ -8,5 +8,3 @@ pub fn build_bool_runtime_value(boolean: bool) -> RuntimeValue {
         }),
     }
 }
-
-
