@@ -1,3 +1,8 @@
 if x {
-    print("hello");
+    print("hello")
+} else if y {
+    print("hello2")
+} else {
+    print("hello3")
 } 
+

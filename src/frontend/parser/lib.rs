@@ -11,7 +11,7 @@ use crate::{
 
 use super::ast::{
     ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, ASTStatementKind,
-    FunctionDeclaration, AST,
+    ConditionalStatement, FunctionDeclaration, AST,
 };
 
 pub struct Parser {
@@ -78,7 +78,51 @@ impl Parser {
 
     //TODO: implement conditional and loop statements for parser
     fn parse_conditional_statement(&mut self) -> ASTStatement {
-        todo!()
+        self.advance(); // consume "if"
+
+        let condition = self.parse_expression();
+
+        self.expect(Type::OpenBrace);
+
+        let mut body: Vec<ASTStatement> = vec![self.parse_statement()];
+
+        while self.peek().r#type != Type::EOF && self.peek().r#type != Type::CloseBrace {
+            body.push(self.parse_statement());
+        }
+
+        self.expect(Type::CloseBrace);
+
+        let mut alternate: Option<Box<ASTStatement>> = None;
+
+        if self.peek().r#type == Type::Else {
+            self.advance(); // consume "else"
+
+            if self.peek().r#type == Type::If {
+                alternate = Some(Box::new(self.parse_conditional_statement()));
+            } else {
+                self.expect(Type::OpenBrace);
+
+                let mut alternate_body: Vec<ASTStatement> = vec![self.parse_statement()];
+
+                while self.peek().r#type != Type::EOF && self.peek().r#type != Type::CloseBrace {
+                    alternate_body.push(self.parse_statement());
+                }
+
+                self.expect(Type::CloseBrace);
+
+                alternate = Some(Box::new(ASTStatement {
+                    kind: ASTStatementKind::Block(alternate_body),
+                }));
+            }
+        }
+
+        return ASTStatement {
+            kind: ASTStatementKind::ConditionalStatement(ConditionalStatement {
+                condition,
+                consequence: body,
+                alternate,
+            }),
+        };
     }
 
     fn parse_loop_statement(&mut self) -> ASTStatement {
