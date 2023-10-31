@@ -1,5 +1,6 @@
+use std::io::Write;
+
 use crate::{frontend::parser::ast::ASTExpression, helpers::is_string::LiteralHelpers};
-use anyhow::{bail, Result};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 
@@ -20,6 +21,12 @@ pub enum Type {
     // operators
     Operator,     // +, -, *, /
     Interval,     // ..
+    GreaterThan,  // >
+    LessThan,     // <
+    GreaterEqual, // >=
+    LessEqual,    // <=
+    Not,          // !
+    NotEqual,     // !=
     OpenParen,    // (
     CloseParen,   // )
     Comma,        // ,
@@ -62,7 +69,7 @@ pub struct Token {
     pub(crate) value: Value,
 }
 
-pub fn tokenize(input: &String) -> Result<Vec<Token>> {
+pub fn tokenize(input: &String) -> Result<Vec<Token>, String> {
     const NEW_LINE_CHARACTER: char = 0xA as char;
     let operators = vec![
         '+',
@@ -78,6 +85,12 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
         '}',
         ';',
         ',',
+        '[',
+        ']',
+        '.',
+        '>',
+        '<',
+        '!',
         NEW_LINE_CHARACTER,
     ];
     let mut tokens: Vec<Token> = vec![];
@@ -101,10 +114,57 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                 r#type: Type::Comma,
                 value: Value::String(String::from(",")),
             }),
+            '!' => {
+                let next_char = input.chars().nth(cursor + 1);
+
+                if next_char == Some('=') {
+                    tokens.push(Token {
+                        r#type: Type::NotEqual,
+                        value: Value::String(String::from("!=")),
+                    });
+                    cursor += 1;
+                } else {
+                    tokens.push(Token {
+                        r#type: Type::Not,
+                        value: Value::String(String::from("!")),
+                    })
+                }
+            }
             ':' => tokens.push(Token {
                 r#type: Type::Colon,
                 value: Value::String(String::from(":")),
             }),
+            '>' | '<' => {
+                let next_char = input.chars().nth(cursor + 1);
+
+                if next_char == Some('=') {
+                    match char {
+                        '>' => tokens.push(Token {
+                            r#type: Type::GreaterEqual,
+                            value: Value::String(String::from(">=")),
+                        }),
+                        '<' => tokens.push(Token {
+                            r#type: Type::LessEqual,
+                            value: Value::String(String::from("<=")),
+                        }),
+                        _ => panic!("internal error"),
+                    }
+
+                    cursor += 1;
+                } else {
+                    match char {
+                        '>' => tokens.push(Token {
+                            r#type: Type::GreaterThan,
+                            value: Value::String(String::from(">")),
+                        }),
+                        '<' => tokens.push(Token {
+                            r#type: Type::LessThan,
+                            value: Value::String(String::from("<")),
+                        }),
+                        _ => panic!("internal error"),
+                    }
+                }
+            }
             '{' => tokens.push(Token {
                 r#type: Type::OpenBrace,
                 value: Value::String(String::from("{")),
@@ -185,7 +245,7 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                         ';' => break,
                         ' ' => break,
                         operator if operators.contains(&operator) => break,
-                        _ => bail!("Unable to read character at position {}", cursor + 1),
+                        _ => panic!("Unable to read character at position {}", cursor + 1),
                     }
                 }
 
@@ -232,7 +292,7 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                         value: Value::String(string),
                     }),
 
-                    _ => bail!("failed to read string at position {}", cursor),
+                    _ => panic!("failed to read string at position {}", cursor),
                 }
             }
 
@@ -300,7 +360,7 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>> {
                     }),
                 }
             }
-            _ => bail!("Unable to read character at position {}", cursor),
+            _ => panic!("Unable to read character at position {}", cursor),
         };
 
         cursor += 1;

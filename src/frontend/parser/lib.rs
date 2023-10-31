@@ -316,6 +316,12 @@ impl Parser {
         }
     }
 
+    //TODO: implement this
+    fn parse_comparative_expression(&mut self) -> ASTExpression {
+        let mut left = self.parse_additive_expression();
+        todo!()
+    }
+
     fn parse_additive_expression(&mut self) -> ASTExpression {
         let mut left = self.parse_multiplicative_expression();
 

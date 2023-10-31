@@ -18,10 +18,9 @@ pub enum ASTStatementKind {
 #[derive(Debug, Clone, PartialEq)]
 pub struct LoopStatement {
     pub(crate) body: Vec<ASTStatement>,
-    pub(crate) identifier: String,
-    pub(crate) start: f64,
-    pub(crate) end: f64,
+    pub(crate) identifier: Option<String>,
     pub(crate) condition: Option<ASTExpression>,
+    pub(crate) interval: Option<ASTExpression>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
