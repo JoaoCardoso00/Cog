@@ -19,25 +19,26 @@ pub enum Type {
     While,
 
     // operators
-    Operator,     // +, -, *, /
-    Interval,     // ..
-    GreaterThan,  // >
-    LessThan,     // <
-    GreaterEqual, // >=
-    LessEqual,    // <=
-    Not,          // !
-    NotEqual,     // !=
-    OpenParen,    // (
-    CloseParen,   // )
-    Comma,        // ,
-    Colon,        // :
-    OpenBrace,    // {
-    CloseBrace,   // }
-    OpenBracket,  // [
-    CloseBracket, // ]
-    Semi,         // ;
-    Dot,          // .
-    Equals,       // =
+    Operator,          // +, -, *, /
+    Interval,          // ..
+    InclusiveInterval, // ..=
+    GreaterThan,       // >
+    LessThan,          // <
+    GreaterEqual,      // >=
+    LessEqual,         // <=
+    Not,               // !
+    NotEqual,          // !=
+    OpenParen,         // (
+    CloseParen,        // )
+    Comma,             // ,
+    Colon,             // :
+    OpenBrace,         // {
+    CloseBrace,        // }
+    OpenBracket,       // [
+    CloseBracket,      // ]
+    Semi,              // ;
+    Dot,               // .
+    Equals,            // =
 
     // values
     Number,
@@ -177,12 +178,21 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>, String> {
                 let next_char = input.chars().nth(cursor + 1);
 
                 if next_char == Some('.') {
-                    tokens.push(Token {
-                        r#type: Type::Interval,
-                        value: Value::String(String::from("..")),
-                    });
+                    let inclusive = input.chars().nth(cursor + 2);
 
-                    cursor += 1;
+                    if inclusive == Some('=') {
+                        tokens.push(Token {
+                            r#type: Type::InclusiveInterval,
+                            value: Value::String(String::from("..=")),
+                        });
+                        cursor += 2;
+                    } else {
+                        tokens.push(Token {
+                            r#type: Type::Interval,
+                            value: Value::String(String::from("..")),
+                        });
+                        cursor += 1;
+                    }
                 } else {
                     tokens.push(Token {
                         r#type: Type::Dot,
