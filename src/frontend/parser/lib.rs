@@ -11,7 +11,7 @@ use crate::{
 
 use super::ast::{
     ASTExpression, ASTExpressionBody, ASTExpressionKind, ASTStatement, ASTStatementKind,
-    ConditionalStatement, FunctionDeclaration, AST,
+    ConditionalStatement, FunctionDeclaration, LoopStatement, AST,
 };
 
 pub struct Parser {
@@ -67,7 +67,8 @@ impl Parser {
     fn parse_statement(&mut self) -> ASTStatement {
         match self.peek().r#type {
             Type::Let | Type::Const => self.parse_variable_declaration(),
-            Type::For | Type::While => self.parse_loop_statement(),
+            Type::For => self.parse_for_statement(),
+            Type::While => self.parse_while_statement(),
             Type::Fn => self.parse_function_declaration(),
             Type::If => self.parse_conditional_statement(),
             _ => ASTStatement {
@@ -141,8 +142,61 @@ impl Parser {
         last_statement
     }
 
-    fn parse_loop_statement(&mut self) -> ASTStatement {
-        todo!()
+    fn parse_for_statement(&mut self) -> ASTStatement {
+        self.advance(); // consume "for"
+
+        let iterator_identifier = match self.expect(Type::Identifier).value {
+            Value::String(value) => value,
+            _ => panic!("expected identifier"),
+        }; // consume iterator identifier
+
+        self.expect(Type::In); // consume "in"
+
+        let iterable = self.parse_expression(); // consume iterable
+
+        self.expect(Type::OpenBrace); // consume "{"
+
+        let mut body: Vec<ASTStatement> = vec![self.parse_statement()];
+
+        while self.peek().r#type != Type::EOF && self.peek().r#type != Type::CloseBrace {
+            body.push(self.parse_statement());
+        }
+
+        self.expect(Type::CloseBrace); // consume "}"
+
+        ASTStatement {
+            kind: ASTStatementKind::LoopStatement(LoopStatement {
+                identifier: Some(iterator_identifier),
+                condition: None,
+                interval: Some(iterable),
+                body,
+            }),
+        }
+    }
+
+    fn parse_while_statement(&mut self) -> ASTStatement {
+        self.advance(); // consume "while"
+
+        let condition = Some(self.parse_expression()); // consume condition
+
+        self.expect(Type::OpenBrace); // consume "{"
+
+        let mut body: Vec<ASTStatement> = vec![self.parse_statement()];
+
+        while self.peek().r#type != Type::EOF && self.peek().r#type != Type::CloseBrace {
+            body.push(self.parse_statement());
+        }
+
+        self.expect(Type::CloseBrace); // consume "}"
+
+        ASTStatement {
+            kind: ASTStatementKind::LoopStatement(LoopStatement {
+                identifier: None,
+                condition,
+                interval: None,
+                body,
+            }),
+        }
     }
 
     fn parse_function_declaration(&mut self) -> ASTStatement {
@@ -264,7 +318,7 @@ impl Parser {
 
     fn parse_object_expression(&mut self) -> ASTExpression {
         if self.peek().r#type != Type::OpenBrace {
-            return self.parse_additive_expression();
+            return self.parse_comparative_expression();
         }
 
         self.advance();
@@ -318,8 +372,53 @@ impl Parser {
 
     //TODO: implement this
     fn parse_comparative_expression(&mut self) -> ASTExpression {
-        let mut left = self.parse_additive_expression();
-        todo!()
+        let mut left = self.parse_interval_expression();
+
+        while self.peek().value == Value::String("==".to_string())
+            || self.peek().value == Value::String("!=".to_string())
+            || self.peek().value == Value::String("<".to_string())
+            || self.peek().value == Value::String("<=".to_string())
+            || self.peek().value == Value::String(">".to_string())
+            || self.peek().value == Value::String(">=".to_string())
+        {
+            let operator = self.advance().value;
+
+            let right = self.parse_interval_expression();
+
+            left = ASTExpression {
+                kind: ASTExpressionKind::BinaryExpression,
+                body: ASTExpressionBody::BinaryExpressionBody(BinaryExpression {
+                    left: Box::new(left),
+                    operator,
+                    right: Box::new(right),
+                }),
+            };
+        }
+
+        left
+    }
+
+    fn parse_interval_expression(&mut self) -> ASTExpression {
+        let left = self.parse_additive_expression();
+
+        if self.peek().value == Value::String("..".to_string())
+            || self.peek().value == Value::String("..=".to_string())
+        {
+            let operator = self.advance().value;
+
+            let right = self.parse_additive_expression();
+
+            return ASTExpression {
+                kind: ASTExpressionKind::BinaryExpression,
+                body: ASTExpressionBody::BinaryExpressionBody(BinaryExpression {
+                    left: Box::new(left),
+                    operator,
+                    right: Box::new(right),
+                }),
+            };
+        }
+
+        left
     }
 
     fn parse_additive_expression(&mut self) -> ASTExpression {
