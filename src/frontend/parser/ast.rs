@@ -60,7 +60,6 @@ pub enum ASTExpressionKind {
 
     // literals
     StringLiteral,
-    Property,
     ObjectLiteral,
     NumericLiteral,
 }

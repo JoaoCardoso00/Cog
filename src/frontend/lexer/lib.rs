@@ -306,7 +306,7 @@ pub fn tokenize(input: &String) -> Result<Vec<Token>, String> {
                 }
             }
 
-            char if char.is_ascii() => {
+            char if char.is_alphabetic() => {
                 let mut full_statement = String::from(char);
 
                 // get full statement before classifying it

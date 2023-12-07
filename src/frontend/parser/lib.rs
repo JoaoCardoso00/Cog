@@ -405,7 +405,6 @@ impl Parser {
             || self.peek().value == Value::String("..=".to_string())
         {
             let operator = self.advance().value;
-
             let right = self.parse_additive_expression();
 
             return ASTExpression {
